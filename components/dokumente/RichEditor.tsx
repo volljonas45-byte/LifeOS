@@ -71,6 +71,94 @@ const SIZE_OPTIONS = [
   { label: "Riesig",   value: "36" },
 ];
 
+// ── Color palettes ─────────────────────────────────────────────────────────────
+const TEXT_COLORS = [
+  { label: "Standard",   value: null,      swatch: "#DDDDDD" },
+  { label: "Weiß",       value: "#FFFFFF",  swatch: "#FFFFFF" },
+  { label: "Grau",       value: "#888888",  swatch: "#888888" },
+  { label: "Rot",        value: "#F87171",  swatch: "#F87171" },
+  { label: "Orange",     value: "#FB923C",  swatch: "#FB923C" },
+  { label: "Gelb",       value: "#FCD34D",  swatch: "#FCD34D" },
+  { label: "Grün",       value: "#4ADE80",  swatch: "#4ADE80" },
+  { label: "Türkis",     value: "#2DD4BF",  swatch: "#2DD4BF" },
+  { label: "Blau",       value: "#60A5FA",  swatch: "#60A5FA" },
+  { label: "Violett",    value: "#A78BFA",  swatch: "#A78BFA" },
+  { label: "Pink",       value: "#F472B6",  swatch: "#F472B6" },
+  { label: "Gelb-Grün",  value: "#E8FF6B",  swatch: "#E8FF6B" },
+];
+
+const HIGHLIGHT_COLORS = [
+  { label: "Kein",       value: null,      swatch: "transparent", border: "#444" },
+  { label: "Gelb",       value: "#FEF08A",  swatch: "#FEF08A" },
+  { label: "Grün",       value: "#BBF7D0",  swatch: "#BBF7D0" },
+  { label: "Blau",       value: "#BFDBFE",  swatch: "#BFDBFE" },
+  { label: "Pink",       value: "#FBCFE8",  swatch: "#FBCFE8" },
+  { label: "Orange",     value: "#FED7AA",  swatch: "#FED7AA" },
+  { label: "Lila",       value: "#DDD6FE",  swatch: "#DDD6FE" },
+  { label: "Rot",        value: "#FECACA",  swatch: "#FECACA" },
+  { label: "Neon-Grün",  value: "#E8FF6B",  swatch: "#E8FF6B" },
+  { label: "Dunkel",     value: "#1E293B",  swatch: "#1E293B", border: "#334155" },
+];
+
+// ── Reusable color grid dropdown ───────────────────────────────────────────────
+function ColorPicker({ colors, onSelect, label, currentColor }: {
+  colors: { label: string; value: string | null; swatch: string; border?: string }[];
+  onSelect: (val: string | null) => void;
+  label: string;
+  currentColor?: string | null;
+}) {
+  const [open, setOpen] = useState(false);
+  const active = colors.find((c) => c.value && c.value.toLowerCase() === (currentColor ?? "").toLowerCase());
+
+  return (
+    <div className="relative">
+      <button
+        type="button"
+        onMouseDown={(e) => { e.preventDefault(); setOpen((v) => !v); }}
+        className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs text-[#CCCCCC] hover:text-[#EDEDED] hover:bg-[#2A2A2A] whitespace-nowrap"
+        title={label}
+      >
+        {/* Color preview dot */}
+        <span
+          className="w-3 h-3 rounded-full border border-[#444]"
+          style={{ background: active?.swatch ?? (label === "Farbe" ? "#DDDDDD" : "transparent") }}
+        />
+        {label} ▾
+      </button>
+      {open && (
+        <div className="absolute top-full mt-1 left-0 bg-[#161616] border border-[#2A2A2A] rounded-xl shadow-2xl p-2 z-50 w-[168px]">
+          <div className="grid grid-cols-5 gap-1.5 mb-2">
+            {colors.map((c) => (
+              <button
+                key={c.label}
+                type="button"
+                title={c.label}
+                onMouseDown={(e) => { e.preventDefault(); onSelect(c.value); setOpen(false); }}
+                className="w-7 h-7 rounded-lg transition-transform hover:scale-110 border"
+                style={{
+                  background: c.swatch,
+                  borderColor: c.border ?? (c.value ? "transparent" : "#444"),
+                  outline: active?.value === c.value ? "2px solid #E8FF6B" : "none",
+                  outlineOffset: "1px",
+                }}
+              />
+            ))}
+          </div>
+          <div className="border-t border-[#222] pt-1.5">
+            <button
+              type="button"
+              onMouseDown={(e) => { e.preventDefault(); onSelect(null); setOpen(false); }}
+              className="w-full text-left px-2 py-1 text-[10px] text-[#555555] hover:text-[#AAAAAA] rounded"
+            >
+              Zurücksetzen
+            </button>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
 // ── Floating bubble toolbar ────────────────────────────────────────────────────
 interface BubbleState { top: number; left: number; visible: boolean }
 
@@ -79,6 +167,10 @@ function FloatingToolbar({ editor, bubble, toolbarRef }: { editor: Editor; bubbl
   const [showSizes, setShowSizes] = useState(false);
 
   if (!bubble.visible) return null;
+
+  // Get current colors from editor marks
+  const currentTextColor = editor.getAttributes("textStyle").color ?? null;
+  const currentHighlight = editor.getAttributes("highlight").color ?? null;
 
   function btn(label: string, action: () => void, active?: boolean, display?: React.ReactNode) {
     return (
@@ -120,11 +212,7 @@ function FloatingToolbar({ editor, bubble, toolbarRef }: { editor: Editor; bubbl
               <button
                 key={f.value}
                 type="button"
-                onMouseDown={(e) => {
-                  e.preventDefault();
-                  editor.chain().focus().setFontFamily(f.value).run();
-                  setShowFonts(false);
-                }}
+                onMouseDown={(e) => { e.preventDefault(); editor.chain().focus().setFontFamily(f.value).run(); setShowFonts(false); }}
                 style={{ fontFamily: f.value }}
                 className="w-full text-left px-3 py-1.5 text-sm text-[#CCCCCC] hover:bg-[#222222] hover:text-[#EDEDED] rounded-lg"
               >
@@ -132,11 +220,8 @@ function FloatingToolbar({ editor, bubble, toolbarRef }: { editor: Editor; bubbl
               </button>
             ))}
             <div className="border-t border-[#222222] my-1" />
-            <button
-              type="button"
-              onMouseDown={(e) => { e.preventDefault(); editor.chain().focus().unsetFontFamily().run(); setShowFonts(false); }}
-              className="w-full text-left px-3 py-1.5 text-xs text-[#666666] hover:bg-[#222222] hover:text-[#AAAAAA] rounded-lg"
-            >
+            <button type="button" onMouseDown={(e) => { e.preventDefault(); editor.chain().focus().unsetFontFamily().run(); setShowFonts(false); }}
+              className="w-full text-left px-3 py-1.5 text-xs text-[#666666] hover:bg-[#222222] hover:text-[#AAAAAA] rounded-lg">
               Zurücksetzen
             </button>
           </div>
@@ -155,30 +240,16 @@ function FloatingToolbar({ editor, bubble, toolbarRef }: { editor: Editor; bubbl
         {showSizes && (
           <div className="absolute top-full mt-1 left-0 bg-[#161616] border border-[#2A2A2A] rounded-xl shadow-2xl p-1 min-w-[140px] z-50">
             {SIZE_OPTIONS.map((s) => (
-              <button
-                key={s.value}
-                type="button"
-                onMouseDown={(e) => {
-                  e.preventDefault();
-                  (editor.chain().focus() as any).setFontSize(s.value).run();
-                  setShowSizes(false);
-                }}
+              <button key={s.value} type="button"
+                onMouseDown={(e) => { e.preventDefault(); (editor.chain().focus() as any).setFontSize(s.value).run(); setShowSizes(false); }}
                 className="w-full text-left px-3 py-1.5 rounded-lg text-[#CCCCCC] hover:bg-[#222222] hover:text-[#EDEDED]"
-                style={{ fontSize: `${s.value}px` }}
-              >
+                style={{ fontSize: `${s.value}px` }}>
                 {s.label}
               </button>
             ))}
             <div className="border-t border-[#222222] my-1" />
-            <button
-              type="button"
-              onMouseDown={(e) => {
-                e.preventDefault();
-                (editor.chain().focus() as any).unsetFontSize().run();
-                setShowSizes(false);
-              }}
-              className="w-full text-left px-3 py-1.5 text-xs text-[#666666] hover:bg-[#222222] hover:text-[#AAAAAA] rounded-lg"
-            >
+            <button type="button" onMouseDown={(e) => { e.preventDefault(); (editor.chain().focus() as any).unsetFontSize().run(); setShowSizes(false); }}
+              className="w-full text-left px-3 py-1.5 text-xs text-[#666666] hover:bg-[#222222] hover:text-[#AAAAAA] rounded-lg">
               Zurücksetzen
             </button>
           </div>
@@ -187,16 +258,35 @@ function FloatingToolbar({ editor, bubble, toolbarRef }: { editor: Editor; bubbl
 
       {sep()}
 
+      {/* Text color */}
+      <ColorPicker
+        label="Farbe"
+        colors={TEXT_COLORS}
+        currentColor={currentTextColor}
+        onSelect={(val) => {
+          if (val) editor.chain().focus().setColor(val).run();
+          else editor.chain().focus().unsetColor().run();
+        }}
+      />
+
+      {/* Highlight color */}
+      <ColorPicker
+        label="Marker"
+        colors={HIGHLIGHT_COLORS}
+        currentColor={currentHighlight}
+        onSelect={(val) => {
+          if (val) editor.chain().focus().setHighlight({ color: val }).run();
+          else editor.chain().focus().unsetHighlight().run();
+        }}
+      />
+
+      {sep()}
+
       {/* Text formatting */}
       {btn("Fett", () => editor.chain().focus().toggleBold().run(), editor.isActive("bold"), <strong>Fett</strong>)}
       {btn("Kursiv", () => editor.chain().focus().toggleItalic().run(), editor.isActive("italic"), <em>Kursiv</em>)}
       {btn("Unterstrichen", () => editor.chain().focus().toggleUnderline().run(), editor.isActive("underline"), <span className="underline">Unter</span>)}
       {btn("Durchgestrichen", () => editor.chain().focus().toggleStrike().run(), editor.isActive("strike"), <span className="line-through">Durch</span>)}
-
-      {sep()}
-
-      {btn("Markieren", () => editor.chain().focus().toggleHighlight({ color: "#E8FF6B" }).run(), editor.isActive("highlight"),
-        <span className="bg-[#E8FF6B] text-[#0F0F0F] px-1 rounded font-bold">Mark</span>)}
       {btn("Code", () => editor.chain().focus().toggleCode().run(), editor.isActive("code"),
         <span className="font-mono text-[10px] bg-[#1E1E1E] px-1 rounded">Code</span>)}
 

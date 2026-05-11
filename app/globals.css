@@ -161,7 +161,8 @@
 .tiptap-editor ul[data-type="taskList"] li[data-checked="true"] > div { text-decoration: line-through; color: #555555; }
 .tiptap-editor img { max-width: 100%; border-radius: 8px; border: 1px solid #2A2A2A; margin: 1rem 0; }
 .tiptap-editor a { color: #4D9EFF; text-decoration: underline; text-underline-offset: 2px; }
-.tiptap-editor mark { background: #E8FF6B33; color: #E8FF6B; border-radius: 2px; padding: 0 2px; }
+.tiptap-editor mark { border-radius: 3px; padding: 0 2px; color: inherit; }
+.tiptap-editor [style*="background-color"] mark { color: #0F0F0F; }
 
 /* Tiptap Placeholder */
 .tiptap-editor p.is-editor-empty:first-child::before {
