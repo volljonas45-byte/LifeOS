@@ -102,27 +102,10 @@ export function DashboardHero() {
 
         {/* Quick actions row */}
         <div className="flex items-center gap-2 mt-7">
-          <QuickAction href="/habits" gradient="linear-gradient(145deg,#34D399,#059669)" label="Morgenroutine" icon={
-            <svg width="13" height="13" viewBox="0 0 13 13" fill="none">
-              <circle cx="6.5" cy="6.5" r="3" fill="white"/>
-              <path d="M6.5 1.5V2.5M6.5 10.5V11.5M1.5 6.5H2.5M10.5 6.5H11.5M3 3L3.7 3.7M9.3 9.3L10 10M3 10L3.7 9.3M9.3 3.7L10 3" stroke="white" strokeWidth="1.2" strokeLinecap="round"/>
-            </svg>
-          } />
-          <QuickAction href="/dokumente" gradient="linear-gradient(145deg,#E8FF6B,#C8DF3B)" label="Neue Notiz" accent icon={
-            <svg width="13" height="13" viewBox="0 0 13 13" fill="none">
-              <path d="M6.5 2V11M2 6.5H11" stroke="#0F0F0F" strokeWidth="1.8" strokeLinecap="round"/>
-            </svg>
-          } />
-          <QuickAction href="/sport" gradient="linear-gradient(145deg,#F87171,#DC2626)" label="Workout" icon={
-            <svg width="13" height="13" viewBox="0 0 13 13" fill="none">
-              <path d="M1.5 6.5H3L4 4L5.5 9.5L7.5 3.5L9 7.5L10 5.5H11.5" stroke="white" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round"/>
-            </svg>
-          } />
-          <QuickAction href="/ziele" gradient="linear-gradient(145deg,#FBBF24,#D97706)" label="Ziele" icon={
-            <svg width="13" height="13" viewBox="0 0 13 13" fill="none">
-              <path d="M6.5 1.5L7.8 4.8L11.5 5.3L8.9 7.8L9.6 11.5L6.5 9.8L3.4 11.5L4.1 7.8L1.5 5.3L5.2 4.8L6.5 1.5Z" fill="white" opacity="0.9"/>
-            </svg>
-          } />
+          <QuickAction href="/habits" icon="☀" label="Morgenroutine" />
+          <QuickAction href="/dokumente" icon="+" label="Neue Notiz" accent />
+          <QuickAction href="/sport" icon="⚡" label="Workout" />
+          <QuickAction href="/ziele" icon="★" label="Ziele" />
           <div className="flex-1" />
           <span className="text-[10px] text-[#222222] uppercase tracking-widest">KW {getWeekNumber()}</span>
         </div>
@@ -134,26 +117,15 @@ export function DashboardHero() {
   );
 }
 
-function QuickAction({ href, gradient, icon, label, accent }: {
-  href: string;
-  gradient: string;
-  icon: React.ReactNode;
-  label: string;
-  accent?: boolean;
-}) {
+function QuickAction({ href, icon, label, accent }: { href: string; icon: string; label: string; accent?: boolean }) {
   return (
     <Link href={href}
-      className={`flex items-center gap-2.5 px-3.5 py-2 rounded-xl text-xs font-medium border transition-all duration-150 active:scale-95 ${
+      className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-medium border transition-all duration-150 ${
         accent
-          ? "bg-[#E8FF6B]/10 text-[#D4EB5A] border-[#E8FF6B]/20 hover:bg-[#E8FF6B]/15 shadow-[0_0_16px_rgba(232,255,107,0.08)]"
+          ? "bg-[#E8FF6B] text-[#0F0F0F] border-[#E8FF6B] hover:bg-[#D4EB5A] shadow-[0_0_20px_rgba(232,255,107,0.15)]"
           : "bg-[#111111] text-[#666666] border-[#1E1E1E] hover:border-[#2A2A2A] hover:text-[#AAAAAA] hover:bg-[#141414]"
       }`}>
-      <div
-        className="w-6 h-6 rounded-[7px] flex items-center justify-center shrink-0"
-        style={{ background: gradient }}
-      >
-        {icon}
-      </div>
+      <span className="text-sm leading-none">{icon}</span>
       <span>{label}</span>
     </Link>
   );
