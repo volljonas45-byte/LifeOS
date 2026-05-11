@@ -5,26 +5,28 @@ import { cn } from "@/lib/utils";
 import { HabitStreakBadge } from "./HabitStreakBadge";
 import type { Habit } from "@/lib/types";
 
-// Rich color palettes per section color
-const CARD_PALETTES: Record<string, { bg: string; border: string; text: string; sub: string; checkBg: string; checkBorder: string }[]> = {
+const PALETTES: Record<string, { bg: string; border: string; text: string; sub: string; accent: string }[]> = {
   "#4D9EFF": [
-    { bg: "#0D1E35", border: "#1A3050", text: "#E0EDFF", sub: "#4D9EFF", checkBg: "#4D9EFF", checkBorder: "#4D9EFF" },
-    { bg: "#0A1828", border: "#152840", text: "#D0E5FF", sub: "#3B7FD4", checkBg: "#3B7FD4", checkBorder: "#3B7FD4" },
-    { bg: "#0C1F30", border: "#183050", text: "#D8EEFF", sub: "#5AAEFF", checkBg: "#5AAEFF", checkBorder: "#5AAEFF" },
+    { bg: "#0C1C30", border: "#162840", text: "#D8EEFF", sub: "#4D7AAA", accent: "#4D9EFF" },
+    { bg: "#0A1828", border: "#142238", text: "#CCE5FF", sub: "#3D6A9A", accent: "#3D8AEF" },
+    { bg: "#0E2035", border: "#1A2C45", text: "#E0F0FF", sub: "#558ABB", accent: "#5AAEFF" },
+    { bg: "#081522", border: "#101E30", text: "#C5DFFF", sub: "#345F8A", accent: "#3575D5" },
   ],
   "#E8FF6B": [
-    { bg: "#1A1E0A", border: "#2A2E10", text: "#F0F0CC", sub: "#C8DB50", checkBg: "#E8FF6B", checkBorder: "#E8FF6B" },
-    { bg: "#161A08", border: "#222810", text: "#E8E8C0", sub: "#B8CC40", checkBg: "#D4EB5A", checkBorder: "#D4EB5A" },
-    { bg: "#1C220C", border: "#2C3212", text: "#F4F4D0", sub: "#D0E858", checkBg: "#E0F560", checkBorder: "#E0F560" },
+    { bg: "#191E08", border: "#252D0E", text: "#EEEEBB", sub: "#8A9040", accent: "#E8FF6B" },
+    { bg: "#151A06", border: "#20270C", text: "#E5E5B0", sub: "#7A8035", accent: "#D8EF5B" },
+    { bg: "#1C2209", border: "#2A3210", text: "#F2F2C5", sub: "#959A48", accent: "#F0FF78" },
+    { bg: "#121704", border: "#1C2408", text: "#E0E0A8", sub: "#6A7030", accent: "#CCEE50" },
   ],
   "#A78BFA": [
-    { bg: "#160E28", border: "#261A40", text: "#E8DEFF", sub: "#A78BFA", checkBg: "#A78BFA", checkBorder: "#A78BFA" },
-    { bg: "#120C22", border: "#201535", text: "#DDD5FF", sub: "#9370E8", checkBg: "#9370E8", checkBorder: "#9370E8" },
-    { bg: "#1A1030", border: "#2A1848", text: "#EDE5FF", sub: "#B89CFF", checkBg: "#B89CFF", checkBorder: "#B89CFF" },
+    { bg: "#130E24", border: "#1E1535", text: "#E0D5FF", sub: "#7060AA", accent: "#A78BFA" },
+    { bg: "#100C1E", border: "#1A1230", text: "#D5CCFF", sub: "#605099", accent: "#9578EA" },
+    { bg: "#160F28", border: "#22183C", text: "#E8DEFF", sub: "#7868BB", accent: "#B89CFF" },
+    { bg: "#0E0A1A", border: "#180F28", text: "#CBBFFF", sub: "#584888", accent: "#8A70E0" },
   ],
 };
 
-const DONE_PALETTE = { bg: "#0E1F0E", border: "#1A3A1A", text: "#4ADE80", sub: "#2A8A2A", checkBg: "#4ADE80", checkBorder: "#4ADE80" };
+const DONE = { bg: "#0C1E0C", border: "#143514", text: "#86EFAC", sub: "#3A7A3A", accent: "#4ADE80" };
 
 interface HabitCardProps {
   habit: Habit;
@@ -37,74 +39,86 @@ interface HabitCardProps {
 }
 
 export function HabitCard({ habit, date, colorIndex, sectionColor, isCompleted, onToggle, onDelete }: HabitCardProps) {
-  const [pressing, setPressing] = useState(false);
-  const [showDelete, setShowDelete] = useState(false);
+  const [animating, setAnimating] = useState(false);
+  const [showDel, setShowDel] = useState(false);
 
-  const palettes = CARD_PALETTES[sectionColor] ?? CARD_PALETTES["#4D9EFF"];
-  const palette = isCompleted ? DONE_PALETTE : palettes[colorIndex % palettes.length];
+  const cols = PALETTES[sectionColor] ?? PALETTES["#4D9EFF"];
+  const p = isCompleted ? DONE : cols[colorIndex % cols.length];
+
+  function handleToggle() {
+    setAnimating(true);
+    onToggle();
+    setTimeout(() => setAnimating(false), 400);
+  }
 
   return (
     <div
-      className="relative rounded-2xl overflow-hidden select-none"
-      onMouseEnter={() => setShowDelete(true)}
-      onMouseLeave={() => setShowDelete(false)}
-      style={{ background: palette.bg, border: `1px solid ${palette.border}` }}
+      className="relative rounded-2xl overflow-hidden transition-all duration-300"
+      style={{
+        background: p.bg,
+        border: `1px solid ${p.border}`,
+        opacity: isCompleted ? 0.7 : 1,
+        transform: animating ? "scale(0.985)" : "scale(1)",
+        transition: "all 0.25s cubic-bezier(.4,0,.2,1)",
+      }}
+      onMouseEnter={() => setShowDel(true)}
+      onMouseLeave={() => setShowDel(false)}
     >
-      <div className="flex items-center gap-4 px-4 py-4">
+      <div className="flex items-center gap-3 px-4 py-3.5">
         {/* Text */}
         <div className="flex-1 min-w-0">
-          <p className={cn(
-            "text-base font-semibold leading-snug transition-all",
-            isCompleted ? "line-through opacity-60" : ""
-          )} style={{ color: palette.text }}>
+          <p
+            className="text-sm font-semibold leading-snug transition-all duration-300"
+            style={{
+              color: p.text,
+              textDecoration: isCompleted ? "line-through" : "none",
+              opacity: isCompleted ? 0.6 : 1,
+            }}
+          >
             {habit.name}
           </p>
-          <p className="text-xs mt-0.5" style={{ color: palette.sub }}>
+          <p className="text-[11px] mt-0.5 transition-colors" style={{ color: p.sub }}>
             {habit.frequency === "daily" ? "Jeden Tag" : "Jede Woche"}
           </p>
         </div>
 
         {/* Streak */}
-        <div className="shrink-0">
-          <HabitStreakBadge habitId={habit.id} color={palette.text} />
-        </div>
+        <HabitStreakBadge habitId={habit.id} color={p.accent} />
 
         {/* Check button */}
         <button
-          onClick={onToggle}
-          onMouseDown={() => setPressing(true)}
-          onMouseUp={() => setPressing(false)}
-          onMouseLeave={() => setPressing(false)}
-          className={cn(
-            "w-11 h-11 rounded-full flex items-center justify-center shrink-0 transition-all duration-150",
-            pressing ? "scale-90" : "scale-100",
-          )}
+          onClick={handleToggle}
+          className="w-10 h-10 rounded-full flex items-center justify-center shrink-0 transition-all duration-200 active:scale-90"
           style={{
-            background: isCompleted ? palette.checkBg : "transparent",
-            border: `2.5px solid ${palette.checkBorder}`,
+            background: isCompleted ? p.accent : "transparent",
+            border: `2px solid ${p.accent}`,
+            boxShadow: isCompleted ? `0 0 12px ${p.accent}40` : "none",
           }}
         >
           {isCompleted ? (
-            <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
-              <path d="M4 9L7.5 12.5L14 6" stroke={sectionColor === "#E8FF6B" ? "#0F0F0F" : "#0F0F0F"} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"/>
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="none" className="transition-all duration-200">
+              <path d="M3.5 8L6.5 11L12.5 5" stroke="#0A0A0A" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"/>
             </svg>
           ) : (
-            <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
-              <path d="M7 2V12M2 7H12" stroke={palette.checkBorder} strokeWidth="2" strokeLinecap="round"/>
+            <svg width="12" height="12" viewBox="0 0 12 12" fill="none" className="transition-all duration-200">
+              <path d="M6 1.5V10.5M1.5 6H10.5" stroke={p.accent} strokeWidth="1.8" strokeLinecap="round"/>
             </svg>
           )}
         </button>
       </div>
 
-      {/* Delete button - hover only */}
-      {showDelete && (
-        <button
-          onClick={() => { if (confirm(`"${habit.name}" löschen?`)) onDelete(); }}
-          className="absolute top-2 right-14 text-[10px] text-white/20 hover:text-red-400 transition-colors px-1"
-        >
-          ×
-        </button>
-      )}
+      {/* Delete — hover only */}
+      <button
+        onClick={() => { if (confirm(`"${habit.name}" löschen?`)) onDelete(); }}
+        className="absolute top-1.5 right-1.5 w-5 h-5 flex items-center justify-center rounded-full text-[10px] transition-all duration-200"
+        style={{
+          opacity: showDel ? 0.5 : 0,
+          color: "#F87171",
+          background: showDel ? "#1A0A0A" : "transparent",
+        }}
+      >
+        ×
+      </button>
     </div>
   );
 }
