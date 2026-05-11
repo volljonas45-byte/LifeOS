@@ -261,7 +261,6 @@ function HabitSection({ label, icon, color, habits, selectedDate, isCompleted, o
             isCompleted={isCompleted(habit.id, selectedDate)}
             onToggle={() => onToggle(habit.id, selectedDate)}
             onDelete={() => onDelete(habit.id)}
-            animDelay={i * 0.06}
           />
         ))}
 
