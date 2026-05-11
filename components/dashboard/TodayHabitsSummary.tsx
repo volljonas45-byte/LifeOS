@@ -12,65 +12,81 @@ export function TodayHabitsSummary() {
   const dailyHabits = habits.filter((h) => h.frequency === "daily");
   const rate = todayCompletionRate();
   const done = dailyHabits.filter((h) => isCompleted(h.id, today)).length;
+  const allDone = dailyHabits.length > 0 && done === dailyHabits.length;
 
   return (
-    <div className="bg-[#161616] border border-[#262626] rounded-2xl p-6 h-full">
+    <div className="bg-[#0E0E0E] border border-[#1A1A1A] rounded-2xl p-6 h-full">
       <div className="flex items-center justify-between mb-5">
-        <h2 className="text-xs font-semibold text-[#777777] uppercase tracking-widest">Habits heute</h2>
-        <Link href="/habits" className="text-xs text-[#E8FF6B] hover:text-[#D4EB5A] transition-colors font-medium">Alle →</Link>
+        <div>
+          <h2 className="text-[10px] font-semibold text-[#333333] uppercase tracking-[0.18em]">Habits heute</h2>
+        </div>
+        <Link href="/habits" className="text-[10px] text-[#444444] hover:text-[#E8FF6B] transition-colors">
+          Alle ansehen →
+        </Link>
       </div>
 
       {loading ? (
-        <div className="space-y-3">
-          {[1,2,3].map(i => <div key={i} className="h-8 bg-[#1E1E1E] rounded-lg animate-pulse" />)}
+        <div className="space-y-2.5">
+          {[1,2,3,4].map(i => (
+            <div key={i} className="h-10 bg-[#141414] rounded-xl animate-pulse" />
+          ))}
         </div>
       ) : dailyHabits.length === 0 ? (
-        <div className="flex flex-col items-center justify-center py-8 text-center">
-          <span className="text-3xl mb-3 opacity-20">○</span>
-          <p className="text-sm text-[#666666] mb-4">Noch keine Habits angelegt</p>
-          <Link href="/habits" className="px-4 py-2 bg-[#E8FF6B] text-[#0F0F0F] rounded-lg text-xs font-semibold hover:bg-[#D4EB5A] transition-colors">
+        <div className="flex flex-col items-center justify-center py-10 text-center">
+          <div className="w-12 h-12 rounded-2xl bg-[#141414] border border-[#1E1E1E] flex items-center justify-center mb-4">
+            <span className="text-xl opacity-40">○</span>
+          </div>
+          <p className="text-sm text-[#555555] mb-1">Keine Habits heute</p>
+          <p className="text-xs text-[#333333] mb-4">Leg deine ersten Habits an</p>
+          <Link href="/habits" className="px-4 py-2 bg-[#E8FF6B] text-[#0F0F0F] rounded-xl text-xs font-semibold hover:bg-[#D4EB5A] transition-colors">
             Habits anlegen
           </Link>
         </div>
       ) : (
         <>
-          {/* Progress */}
+          {/* Progress bar + count */}
           <div className="flex items-center gap-3 mb-5">
-            <div className="flex-1 h-1.5 bg-[#1E1E1E] rounded-full overflow-hidden">
+            <div className="flex-1 h-1.5 bg-[#141414] rounded-full overflow-hidden">
               <div
-                className="h-full bg-[#E8FF6B] rounded-full transition-all duration-700"
-                style={{ width: `${rate}%` }}
+                className="h-full rounded-full transition-all duration-700"
+                style={{
+                  width: `${rate}%`,
+                  background: allDone ? "#4ADE80" : "#E8FF6B",
+                  boxShadow: allDone ? "0 0 12px rgba(74,222,128,0.4)" : rate > 0 ? "0 0 12px rgba(232,255,107,0.3)" : "none",
+                }}
               />
             </div>
-            <span className="text-sm font-semibold text-[#F0F0F0] tabular-nums">
-              {done}<span className="text-[#555555] font-normal">/{dailyHabits.length}</span>
+            <span className="text-sm font-bold text-[#EDEDED] tabular-nums shrink-0">
+              {done}<span className="text-[#333333] font-normal text-xs">/{dailyHabits.length}</span>
             </span>
+            {allDone && <span className="text-xs">🎉</span>}
           </div>
 
           {/* Habit rows */}
           <div className="space-y-0.5">
-            {dailyHabits.map((h) => {
+            {dailyHabits.slice(0, 7).map((h) => {
               const completed = isCompleted(h.id, today);
               return (
-                <div key={h.id}
-                  className={`flex items-center gap-3 px-3 py-2.5 rounded-xl cursor-pointer transition-all ${
-                    completed ? "opacity-50" : "hover:bg-[#1E1E1E]"
+                <div
+                  key={h.id}
+                  className={`flex items-center gap-3 px-3 py-2.5 rounded-xl cursor-pointer transition-all select-none ${
+                    completed ? "opacity-40" : "hover:bg-[#141414]"
                   }`}
                   onClick={() => toggleHabit(h.id, today)}
                 >
                   <HabitCircle completed={completed} size="sm" />
-                  <span className={`text-sm flex-1 transition-colors ${completed ? "text-[#555555] line-through" : "text-[#DDDDDD]"}`}>
+                  <span className={`text-sm flex-1 transition-colors ${completed ? "text-[#444444] line-through" : "text-[#CCCCCC]"}`}>
                     {h.name}
                   </span>
                   <HabitStreakBadge habitId={h.id} />
-                  {h.category && (
-                    <span className="text-[10px] text-[#555555] px-1.5 py-0.5 bg-[#1E1E1E] border border-[#2A2A2A] rounded-full">
-                      {h.category}
-                    </span>
-                  )}
                 </div>
               );
             })}
+            {dailyHabits.length > 7 && (
+              <Link href="/habits" className="block text-center text-[10px] text-[#333333] hover:text-[#666666] py-1.5 transition-colors">
+                +{dailyHabits.length - 7} weitere
+              </Link>
+            )}
           </div>
         </>
       )}

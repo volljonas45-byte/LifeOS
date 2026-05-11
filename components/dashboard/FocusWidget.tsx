@@ -17,6 +17,7 @@ export function FocusWidget() {
   const [items, setItems] = useState(["", "", ""]);
   const [editing, setEditing] = useState<number | null>(null);
   const weekKey = getWeekKey();
+  const weekNumber = weekKey.split("-W")[1];
 
   useEffect(() => {
     try {
@@ -42,46 +43,66 @@ export function FocusWidget() {
     if (e.key === "ArrowUp" && i > 0) setEditing(i - 1);
   }
 
-  const weekNumber = weekKey.split("-W")[1];
+  const filled = items.filter(i => i.trim()).length;
 
   return (
-    <div className="bg-[#161616] border border-[#262626] rounded-2xl p-6">
+    <div className="bg-[#0E0E0E] border border-[#1A1A1A] rounded-2xl p-6">
       <div className="flex items-center justify-between mb-5">
-        <h2 className="text-xs font-semibold text-[#777777] uppercase tracking-widest">Fokus diese Woche</h2>
-        <span className="text-[10px] text-[#444444]">KW {weekNumber}</span>
+        <div>
+          <h2 className="text-[10px] font-semibold text-[#333333] uppercase tracking-[0.18em]">Wochenfokus</h2>
+        </div>
+        <span className="text-[10px] text-[#2A2A2A] border border-[#1A1A1A] px-2 py-0.5 rounded-full">
+          KW {weekNumber}
+        </span>
       </div>
+
       <div className="space-y-2">
-        {items.map((item, i) => (
-          <div key={i} className="flex items-center gap-3">
-            <span className={`w-4 h-4 rounded-full border shrink-0 flex items-center justify-center transition-colors ${
-              item.trim() ? "border-[#E8FF6B]/40 bg-[#E8FF6B]/5" : "border-[#2A2A2A]"
-            }`}>
-              {item.trim() && <span className="w-1.5 h-1.5 rounded-full bg-[#E8FF6B]/60" />}
-            </span>
-            {editing === i ? (
-              <input
-                autoFocus
-                value={item}
-                onChange={(e) => handleChange(i, e.target.value)}
-                onBlur={() => setEditing(null)}
-                onKeyDown={(e) => handleKeyDown(e, i)}
-                placeholder={`Priorität ${i + 1}…`}
-                className="flex-1 bg-transparent text-sm text-[#EDEDED] placeholder:text-[#2A2A2A] outline-none border-b border-[#E8FF6B]/30 pb-0.5"
-              />
-            ) : (
-              <button
-                onClick={() => setEditing(i)}
-                className="flex-1 text-left text-sm transition-colors"
-              >
-                {item.trim()
-                  ? <span className="text-[#DDDDDD]">{item}</span>
-                  : <span className="text-[#444444] italic">Priorität {i + 1} eintragen…</span>
+        {items.map((item, i) => {
+          const hasFilled = !!item.trim();
+          return (
+            <div key={i} className="flex items-center gap-3 group">
+              <div className={`w-5 h-5 rounded-lg border flex items-center justify-center shrink-0 transition-all ${
+                hasFilled
+                  ? "border-[#E8FF6B]/30 bg-[#E8FF6B]/8"
+                  : "border-[#1E1E1E] bg-transparent"
+              }`}>
+                {hasFilled
+                  ? <span className="text-[8px] font-bold text-[#E8FF6B]">{i + 1}</span>
+                  : <span className="text-[10px] text-[#2A2A2A]">{i + 1}</span>
                 }
-              </button>
-            )}
-          </div>
-        ))}
+              </div>
+
+              {editing === i ? (
+                <input
+                  autoFocus
+                  value={item}
+                  onChange={(e) => handleChange(i, e.target.value)}
+                  onBlur={() => setEditing(null)}
+                  onKeyDown={(e) => handleKeyDown(e, i)}
+                  placeholder={`Priorität ${i + 1}…`}
+                  className="flex-1 bg-transparent text-sm text-[#EDEDED] placeholder:text-[#222222] outline-none border-b border-[#E8FF6B]/25 pb-0.5"
+                />
+              ) : (
+                <button
+                  onClick={() => setEditing(i)}
+                  className="flex-1 text-left text-sm transition-colors"
+                >
+                  {hasFilled
+                    ? <span className="text-[#CCCCCC] group-hover:text-[#EDEDED] transition-colors">{item}</span>
+                    : <span className="text-[#252525] group-hover:text-[#333333] transition-colors italic">Klicken zum Eintragen…</span>
+                  }
+                </button>
+              )}
+            </div>
+          );
+        })}
       </div>
+
+      {filled === 3 && (
+        <div className="mt-4 pt-3 border-t border-[#141414]">
+          <p className="text-[10px] text-[#333333]">Top-3 für diese Woche gesetzt ✓</p>
+        </div>
+      )}
     </div>
   );
 }

@@ -83,6 +83,7 @@ export default function ZielePage() {
         {activeGoal && (
           <GoalDetail
             goal={activeGoal}
+            goalIndex={goals.findIndex(g => g.id === activeGoal.id)}
             onAddMilestone={addMilestone}
             onUpdateMilestone={updateMilestone}
             onDeleteMilestone={deleteMilestone}

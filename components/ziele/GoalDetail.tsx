@@ -14,8 +14,11 @@ const STATUS_CONFIG: Record<string, { label: string; color: string; bg: string; 
 
 const GOAL_ACCENTS = ["#E8FF6B", "#4D9EFF", "#4ADE80"];
 
+export { GOAL_ACCENTS };
+
 interface GoalDetailProps {
   goal: Goal;
+  goalIndex: number;
   onAddMilestone: (goalId: string, title: string, deadline?: string, progressType?: Milestone["progress_type"], targetValue?: number, valueUnit?: string) => Promise<void>;
   onUpdateMilestone: (id: string, updates: Partial<Milestone>) => Promise<void>;
   onDeleteMilestone: (id: string) => Promise<void>;
@@ -26,6 +29,7 @@ interface GoalDetailProps {
 
 export function GoalDetail({
   goal,
+  goalIndex,
   onAddMilestone,
   onUpdateMilestone,
   onDeleteMilestone,
@@ -34,8 +38,7 @@ export function GoalDetail({
   onDeleteProject,
 }: GoalDetailProps) {
   const milestones = goal.milestones ?? [];
-  const goalIndex = 0; // accent is passed from parent ideally but we derive from title hash
-  const accent = GOAL_ACCENTS[0]; // first goal accent by default
+  const accent = GOAL_ACCENTS[goalIndex % GOAL_ACCENTS.length];
 
   const [expandedId, setExpandedId] = useState<string | null>(
     milestones.length > 0 ? milestones[0].id : null
@@ -63,7 +66,7 @@ export function GoalDetail({
       <div className="flex items-center gap-3 mb-4">
         <div className="h-px flex-1 bg-[#1A1A1A]" />
         <span className="text-[11px] font-semibold text-[#444444] uppercase tracking-[0.15em] flex items-center gap-2">
-          <span className="w-1.5 h-1.5 rounded-full bg-[#E8FF6B]" />
+          <span className="w-1.5 h-1.5 rounded-full" style={{ background: accent }} />
           {goal.title}
         </span>
         <div className="h-px flex-1 bg-[#1A1A1A]" />
@@ -200,8 +203,8 @@ export function GoalDetail({
                 </div>
                 <div className="w-full h-1.5 bg-[#1A1A1A] rounded-full overflow-hidden">
                   <div
-                    className="h-full rounded-full bg-[#E8FF6B] transition-all"
-                    style={{ width: `${Math.round(milestones.reduce((s, m) => s + m.progress, 0) / milestones.length)}%` }}
+                    className="h-full rounded-full transition-all"
+                    style={{ width: `${Math.round(milestones.reduce((s, m) => s + m.progress, 0) / milestones.length)}%`, background: accent }}
                   />
                 </div>
                 <p className="text-[10px] text-[#444444] mt-2">
