@@ -74,7 +74,7 @@ const SIZE_OPTIONS = [
 // ── Floating bubble toolbar ────────────────────────────────────────────────────
 interface BubbleState { top: number; left: number; visible: boolean }
 
-function FloatingToolbar({ editor, bubble }: { editor: Editor; bubble: BubbleState }) {
+function FloatingToolbar({ editor, bubble, toolbarRef }: { editor: Editor; bubble: BubbleState; toolbarRef: React.RefObject<HTMLDivElement | null> }) {
   const [showFonts, setShowFonts] = useState(false);
   const [showSizes, setShowSizes] = useState(false);
 
@@ -100,9 +100,10 @@ function FloatingToolbar({ editor, bubble }: { editor: Editor; bubble: BubbleSta
 
   return (
     <div
+      ref={toolbarRef}
       className="fixed z-50 flex items-center gap-0.5 bg-[#161616] border border-[#2A2A2A] rounded-xl px-1.5 py-1.5 shadow-2xl"
       style={{ top: bubble.top, left: bubble.left, transform: "translateX(-50%)" }}
-      onMouseDown={(e) => e.preventDefault()}
+      onMouseDown={(e) => { e.preventDefault(); e.stopPropagation(); }}
     >
       {/* Font family picker */}
       <div className="relative">
@@ -334,6 +335,7 @@ function ContextMenu({ editor, menu, onClose, onInsertImage }: {
 export function RichEditor({ content, onChange, placeholder }: RichEditorProps) {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const isInitialized = useRef(false);
+  const toolbarRef = useRef<HTMLDivElement | null>(null);
 
   const [bubble, setBubble] = useState<BubbleState>({ top: 0, left: 0, visible: false });
   const [slashOpen, setSlashOpen] = useState(false);
@@ -389,7 +391,12 @@ export function RichEditor({ content, onChange, placeholder }: RichEditorProps) 
     },
     onSelectionUpdate({ editor }) {
       const { from, to } = editor.state.selection;
-      if (from === to) { setBubble((b) => ({ ...b, visible: false })); return; }
+      if (from === to) {
+        // Don't immediately hide — the toolbar mousedown may have collapsed
+        // the selection momentarily before re-applying it.
+        // We rely on the outside-click listener instead.
+        return;
+      }
       const startCoords = editor.view.coordsAtPos(from);
       const endCoords = editor.view.coordsAtPos(to);
       const midX = (startCoords.left + endCoords.left) / 2;
@@ -433,10 +440,19 @@ export function RichEditor({ content, onChange, placeholder }: RichEditorProps) 
   }, []);
 
   useEffect(() => {
-    function hide() { setBubble((b) => ({ ...b, visible: false })); }
-    document.addEventListener("mousedown", hide);
-    return () => document.removeEventListener("mousedown", hide);
-  }, []);
+    function hideOnClickOutside(e: MouseEvent) {
+      // Don't hide when clicking inside the toolbar itself
+      if (toolbarRef.current?.contains(e.target as Node)) return;
+      // Hide after pointer up so we can check if selection still exists
+      requestAnimationFrame(() => {
+        if (!editor) return;
+        const { from, to } = editor.state.selection;
+        if (from === to) setBubble((b) => ({ ...b, visible: false }));
+      });
+    }
+    document.addEventListener("mouseup", hideOnClickOutside);
+    return () => document.removeEventListener("mouseup", hideOnClickOutside);
+  }, [editor]);
 
   const insertImage = useCallback(() => { fileInputRef.current?.click(); }, []);
 
@@ -460,7 +476,7 @@ export function RichEditor({ content, onChange, placeholder }: RichEditorProps) 
 
   return (
     <div className="flex flex-col">
-      <FloatingToolbar editor={editor} bubble={bubble} />
+      <FloatingToolbar editor={editor} bubble={bubble} toolbarRef={toolbarRef} />
       <SlashMenu
         items={filteredSlash}
         selectedIdx={slashIdx}
