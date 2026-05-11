@@ -481,12 +481,7 @@ export function RichEditor({ content, onChange, placeholder }: RichEditorProps) 
     },
     onSelectionUpdate({ editor }) {
       const { from, to } = editor.state.selection;
-      if (from === to) {
-        // Don't immediately hide — the toolbar mousedown may have collapsed
-        // the selection momentarily before re-applying it.
-        // We rely on the outside-click listener instead.
-        return;
-      }
+      if (from === to) return; // hide handled by mouseup listener
       const startCoords = editor.view.coordsAtPos(from);
       const endCoords = editor.view.coordsAtPos(to);
       const midX = (startCoords.left + endCoords.left) / 2;
@@ -564,6 +559,12 @@ export function RichEditor({ content, onChange, placeholder }: RichEditorProps) 
 
   if (!editor) return null;
 
+  // Active format state (for the status bar)
+  const activeFont = FONT_OPTIONS.find((f) => editor.isActive("textStyle", { fontFamily: f.value }));
+  const activeSize = editor.getAttributes("textStyle").fontSize ?? null;
+  const activeTextColor = editor.getAttributes("textStyle").color ?? null;
+  const activeHighlight = editor.getAttributes("highlight").color ?? null;
+
   return (
     <div className="flex flex-col">
       <FloatingToolbar editor={editor} bubble={bubble} toolbarRef={toolbarRef} />
@@ -581,15 +582,126 @@ export function RichEditor({ content, onChange, placeholder }: RichEditorProps) 
       />
       <input ref={fileInputRef} type="file" accept="image/*" className="hidden" onChange={handleImageFile} />
 
-      {/* Hints */}
-      <div className="flex flex-wrap items-center gap-x-4 gap-y-1 mb-5 text-[10px] text-[#3A3A3A]">
-        <span><kbd className="bg-[#1A1A1A] border border-[#2A2A2A] rounded px-1 font-mono text-[9px]">/</kbd> Blöcke</span>
-        <span>Text markieren → Schriftart & Größe</span>
-        <span>Rechtsklick → Menü</span>
-        <span><kbd className="bg-[#1A1A1A] border border-[#2A2A2A] rounded px-1 font-mono text-[9px]">Strg+B/I/Z</kbd></span>
+      {/* ── Permanent format status bar ── */}
+      <div className="flex flex-wrap items-center gap-1.5 mb-5 p-2 bg-[#111111] border border-[#1E1E1E] rounded-xl">
+        {/* Font family */}
+        <div className="relative group">
+          <button
+            type="button"
+            onMouseDown={(e) => { e.preventDefault(); editor.commands.focus(); }}
+            className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs text-[#888888] hover:text-[#CCCCCC] hover:bg-[#1A1A1A] transition-colors"
+            title="Schriftart — wähle Text aus oder klicke zum Voraus-Setzen"
+          >
+            <span style={{ fontFamily: activeFont?.value ?? "inherit" }}>
+              {activeFont?.label.split(" ")[0] ?? "Standard"}
+            </span>
+            <span className="text-[#444]">▾</span>
+          </button>
+          <div className="absolute top-full mt-1 left-0 hidden group-focus-within:block bg-[#161616] border border-[#2A2A2A] rounded-xl shadow-2xl p-1 min-w-[180px] z-50">
+            {FONT_OPTIONS.map((f) => (
+              <button key={f.value} type="button"
+                onMouseDown={(e) => { e.preventDefault(); editor.chain().focus().setFontFamily(f.value).run(); }}
+                style={{ fontFamily: f.value }}
+                className={`w-full text-left px-3 py-1.5 text-sm rounded-lg transition-colors ${activeFont?.value === f.value ? "text-[#E8FF6B] bg-[#1A1E0A]" : "text-[#CCCCCC] hover:bg-[#222]"}`}>
+                {f.label}
+              </button>
+            ))}
+            <div className="border-t border-[#222] my-1" />
+            <button type="button" onMouseDown={(e) => { e.preventDefault(); editor.chain().focus().unsetFontFamily().run(); }}
+              className="w-full text-left px-3 py-1.5 text-xs text-[#555] hover:text-[#AAA] hover:bg-[#222] rounded-lg">
+              Zurücksetzen
+            </button>
+          </div>
+        </div>
+
+        <div className="w-px h-3.5 bg-[#222]" />
+
+        {/* Font size */}
+        <div className="relative group">
+          <button
+            type="button"
+            onMouseDown={(e) => { e.preventDefault(); editor.commands.focus(); }}
+            className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs text-[#888888] hover:text-[#CCCCCC] hover:bg-[#1A1A1A] transition-colors"
+            title="Schriftgröße"
+          >
+            {activeSize ? `${activeSize}px` : "Normal"}
+            <span className="text-[#444]">▾</span>
+          </button>
+          <div className="absolute top-full mt-1 left-0 hidden group-focus-within:block bg-[#161616] border border-[#2A2A2A] rounded-xl shadow-2xl p-1 min-w-[130px] z-50">
+            {SIZE_OPTIONS.map((s) => (
+              <button key={s.value} type="button"
+                onMouseDown={(e) => { e.preventDefault(); (editor.chain().focus() as any).setFontSize(s.value).run(); }}
+                className={`w-full text-left px-3 py-1.5 rounded-lg transition-colors ${activeSize === s.value ? "text-[#E8FF6B] bg-[#1A1E0A]" : "text-[#CCCCCC] hover:bg-[#222]"}`}
+                style={{ fontSize: `${s.value}px` }}>
+                {s.label}
+              </button>
+            ))}
+            <div className="border-t border-[#222] my-1" />
+            <button type="button" onMouseDown={(e) => { e.preventDefault(); (editor.chain().focus() as any).unsetFontSize().run(); }}
+              className="w-full text-left px-3 py-1.5 text-xs text-[#555] hover:text-[#AAA] hover:bg-[#222] rounded-lg">
+              Zurücksetzen
+            </button>
+          </div>
+        </div>
+
+        <div className="w-px h-3.5 bg-[#222]" />
+
+        {/* Text color swatch */}
+        <ColorPicker
+          label="Farbe"
+          colors={TEXT_COLORS}
+          currentColor={activeTextColor}
+          onSelect={(val) => {
+            if (val) editor.chain().focus().setColor(val).run();
+            else editor.chain().focus().unsetColor().run();
+          }}
+        />
+
+        {/* Highlight swatch */}
+        <ColorPicker
+          label="Marker"
+          colors={HIGHLIGHT_COLORS}
+          currentColor={activeHighlight}
+          onSelect={(val) => {
+            if (val) editor.chain().focus().setHighlight({ color: val }).run();
+            else editor.chain().focus().unsetHighlight().run();
+          }}
+        />
+
+        <div className="w-px h-3.5 bg-[#222]" />
+
+        {/* Quick format toggles */}
+        {[
+          { label: "F", title: "Fett", action: () => editor.chain().focus().toggleBold().run(), active: editor.isActive("bold"), style: { fontWeight: 700 } },
+          { label: "K", title: "Kursiv", action: () => editor.chain().focus().toggleItalic().run(), active: editor.isActive("italic"), style: { fontStyle: "italic" } },
+          { label: "U", title: "Unterstrichen", action: () => editor.chain().focus().toggleUnderline().run(), active: editor.isActive("underline"), style: { textDecoration: "underline" } },
+        ].map((b) => (
+          <button key={b.title} type="button"
+            onMouseDown={(e) => { e.preventDefault(); b.action(); }}
+            title={b.title}
+            className={`px-2 py-1 rounded-lg text-xs transition-colors ${b.active ? "bg-[#E8FF6B] text-[#0F0F0F]" : "text-[#666] hover:text-[#CCC] hover:bg-[#1A1A1A]"}`}
+            style={b.style}>
+            {b.label}
+          </button>
+        ))}
+
+        {/* Hint */}
+        <span className="ml-auto text-[9px] text-[#2A2A2A]">
+          Text markieren → Toolbar · <kbd className="font-mono">/</kbd> Blöcke · Rechtsklick → Menü
+        </span>
       </div>
 
-      <div onContextMenu={handleContextMenu} onMouseDown={(e) => e.stopPropagation()}>
+      {/* Editor — click to close floating toolbar */}
+      <div
+        onContextMenu={handleContextMenu}
+        onMouseDown={(e) => e.stopPropagation()}
+        onClick={() => {
+          // Close floating toolbar if no selection active
+          if (!editor) return;
+          const { from, to } = editor.state.selection;
+          if (from === to) setBubble((b) => ({ ...b, visible: false }));
+        }}
+      >
         <EditorContent editor={editor} />
       </div>
     </div>
