@@ -30,11 +30,25 @@ export function useDocuments(filter?: { type?: DocumentType; category?: string; 
   }, [fetchDocuments]);
 
   const createDocument = useCallback(async (doc: Partial<Document>) => {
-    const { data } = await supabase
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) return null;
+
+    const { data, error } = await supabase
       .from("documents")
-      .insert({ title: "Neue Notiz", type: "notiz", ...doc })
+      .insert({
+        title: "Neue Notiz",
+        type: "notiz",
+        ...doc,
+        user_id: user.id,
+      })
       .select()
       .single();
+
+    if (error) {
+      console.error("createDocument error:", error);
+      return null;
+    }
+
     if (data) setDocuments((prev) => [data, ...prev]);
     return data;
   }, []);

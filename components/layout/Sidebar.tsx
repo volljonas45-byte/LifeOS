@@ -9,7 +9,7 @@ const navItems = [
   { href: "/habits",    label: "Habits",     icon: "○" },
   { href: "/ziele",     label: "Ziele",      icon: "◎" },
   { href: "/sport",     label: "Sport",      icon: "◈" },
-  { href: "/dokumente", label: "Dokumente",  icon: "▣" },
+  { href: "/dokumente", label: "Dokumente",  icon: "≡" },
 ];
 
 export function Sidebar() {

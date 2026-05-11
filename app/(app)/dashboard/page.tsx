@@ -68,7 +68,7 @@ function QuickNavCard() {
     { href: "/habits",    icon: "○", label: "Habits" },
     { href: "/ziele",     icon: "◎", label: "Ziele" },
     { href: "/sport",     icon: "◈", label: "Sport" },
-    { href: "/dokumente", icon: "▣", label: "Docs" },
+    { href: "/dokumente", icon: "≡", label: "Docs" },
   ];
   return (
     <div className="bg-[#111111] border border-[#1E1E1E] rounded-2xl p-5">
