@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useHabits } from "@/lib/hooks/useHabits";
 import { getToday } from "@/lib/utils/dates";
 import { HabitCircle } from "@/components/habits/HabitCircle";
+import { HabitStreakBadge } from "@/components/habits/HabitStreakBadge";
 
 export function TodayHabitsSummary() {
   const { habits, loading, isCompleted, toggleHabit, todayCompletionRate } = useHabits();
@@ -59,6 +60,7 @@ export function TodayHabitsSummary() {
                   <span className={`text-sm flex-1 transition-colors ${completed ? "text-[#444444] line-through" : "text-[#CCCCCC]"}`}>
                     {h.name}
                   </span>
+                  <HabitStreakBadge habitId={h.id} />
                   {h.category && (
                     <span className="text-[10px] text-[#444444] px-1.5 py-0.5 bg-[#1A1A1A] border border-[#242424] rounded-full">
                       {h.category}

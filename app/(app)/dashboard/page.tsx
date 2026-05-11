@@ -1,45 +1,18 @@
 "use client";
 
-import Link from "next/link";
 import { TodayHabitsSummary } from "@/components/dashboard/TodayHabitsSummary";
 import { GoalsSummary } from "@/components/dashboard/GoalsSummary";
 import { RecentDocuments } from "@/components/dashboard/RecentDocuments";
 import { FocusWidget } from "@/components/dashboard/FocusWidget";
-import { formatDate } from "@/lib/utils/dates";
+import { DashboardHero } from "@/components/dashboard/DashboardHero";
+import Link from "next/link";
 
 export default function DashboardPage() {
-  const today = formatDate(new Date(), "EEEE, d. MMMM yyyy");
-  const hour = new Date().getHours();
-  const greeting = hour < 12 ? "Guten Morgen" : hour < 18 ? "Guten Tag" : "Guten Abend";
-
   return (
     <div className="min-h-screen bg-[#0F0F0F]">
+      <DashboardHero />
 
-      {/* Hero */}
-      <div className="px-8 pt-10 pb-8">
-        <div className="flex items-end justify-between">
-          <div>
-            <p className="text-[11px] font-medium text-[#444444] uppercase tracking-[0.15em] mb-2">{today}</p>
-            <h1 className="font-display text-4xl font-semibold text-[#EDEDED] tracking-tight leading-none">
-              {greeting}
-            </h1>
-          </div>
-          <div className="flex items-center gap-2 pb-1">
-            <QuickPill href="/habits" label="Morgenroutine" icon="☀" />
-            <QuickPill href="/dokumente" label="Neue Notiz" icon="+" accent />
-            <QuickPill href="/sport" label="Workout" icon="◈" />
-          </div>
-        </div>
-
-        {/* Accent line */}
-        <div className="mt-6 flex items-center gap-3">
-          <div className="h-px flex-1 bg-[#1A1A1A]" />
-          <span className="text-[10px] text-[#333333] uppercase tracking-widest">Heute</span>
-          <div className="h-px flex-1 bg-[#1A1A1A]" />
-        </div>
-      </div>
-
-      <div className="px-8 pb-8 space-y-5">
+      <div className="px-8 pb-8 space-y-4 mt-6">
 
         {/* ROW 1: Habits (wide) + Ziele */}
         <div className="grid grid-cols-5 gap-4">
@@ -53,13 +26,8 @@ export default function DashboardPage() {
 
         {/* ROW 2: Fokus + Dokumente + Routinen */}
         <div className="grid grid-cols-3 gap-4">
-
           <FocusWidget />
-
-          {/* Dokumente */}
           <RecentDocuments />
-
-          {/* Routinen + Nav */}
           <div className="space-y-4">
             <RoutinesCard />
             <QuickNavCard />
@@ -70,7 +38,6 @@ export default function DashboardPage() {
     </div>
   );
 }
-
 
 function RoutinesCard() {
   return (
@@ -118,18 +85,3 @@ function QuickNavCard() {
     </div>
   );
 }
-
-function QuickPill({ href, label, icon, accent }: { href: string; label: string; icon: string; accent?: boolean }) {
-  return (
-    <Link href={href}
-      className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs font-medium border transition-all ${
-        accent
-          ? "bg-[#E8FF6B] text-[#0F0F0F] border-[#E8FF6B] hover:bg-[#D4EB5A]"
-          : "bg-transparent text-[#666666] border-[#222222] hover:border-[#333333] hover:text-[#AAAAAA]"
-      }`}>
-      <span>{icon}</span>
-      <span>{label}</span>
-    </Link>
-  );
-}
-

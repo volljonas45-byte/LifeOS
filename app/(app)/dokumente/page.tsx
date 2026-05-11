@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { Topbar } from "@/components/layout/Topbar";
 import { CategorySidebar } from "@/components/dokumente/CategorySidebar";
 import { DocumentCard } from "@/components/dokumente/DocumentCard";
@@ -10,6 +10,7 @@ import { useDocuments } from "@/lib/hooks/useDocuments";
 export default function DokumentePage() {
   const [selected, setSelected] = useState<string | null>("recent");
   const [modalOpen, setModalOpen] = useState(false);
+  const [search, setSearch] = useState("");
 
   const filter = selected === "inbox"
     ? { is_inbox: true }
@@ -23,6 +24,15 @@ export default function DokumentePage() {
 
   const { documents, loading, createDocument } = useDocuments(filter);
 
+  const filtered = useMemo(() => {
+    if (!search.trim()) return documents;
+    const q = search.toLowerCase();
+    return documents.filter((d) =>
+      d.title.toLowerCase().includes(q) ||
+      (d.content ?? "").toLowerCase().includes(q)
+    );
+  }, [documents, search]);
+
   const sectionTitle = selected === "inbox" ? "Posteingang"
     : selected === "favorites" ? "Favoriten"
     : selected === "tagebuch" ? "Tagebuch"
@@ -33,16 +43,33 @@ export default function DokumentePage() {
     <div className="flex flex-col min-h-screen bg-[#0F0F0F]">
       <Topbar title="Dokumente" subtitle="Second Brain" />
       <div className="flex flex-1">
-        <CategorySidebar selected={selected} onSelect={setSelected} />
+        <CategorySidebar selected={selected} onSelect={(k) => { setSelected(k); setSearch(""); }} />
 
         <div className="flex-1 px-8 py-6">
-          <div className="flex items-center justify-between mb-6">
-            <h2 className="text-[10px] font-semibold text-[#444444] uppercase tracking-[0.12em]">
+          {/* Header */}
+          <div className="flex items-center gap-4 mb-6">
+            <h2 className="text-[10px] font-semibold text-[#444444] uppercase tracking-[0.12em] shrink-0">
               {sectionTitle}
+              {search && <span className="text-[#333333] normal-case ml-1">· "{search}"</span>}
             </h2>
+
+            {/* Search */}
+            <div className="flex-1 relative max-w-xs">
+              <span className="absolute left-3 top-1/2 -translate-y-1/2 text-[#333333] text-xs">⌕</span>
+              <input
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+                placeholder="Suchen…"
+                className="w-full pl-7 pr-3 py-1.5 bg-[#111111] border border-[#1E1E1E] rounded-lg text-xs text-[#CCCCCC] placeholder:text-[#333333] focus:outline-none focus:border-[#2A2A2A]"
+              />
+              {search && (
+                <button onClick={() => setSearch("")} className="absolute right-3 top-1/2 -translate-y-1/2 text-[#444444] hover:text-[#888888]">×</button>
+              )}
+            </div>
+
             <button
               onClick={() => setModalOpen(true)}
-              className="px-3.5 py-1.5 bg-[#E8FF6B] text-[#0F0F0F] rounded-lg text-xs font-semibold hover:bg-[#D4EB5A] transition-colors"
+              className="ml-auto px-3.5 py-1.5 bg-[#E8FF6B] text-[#0F0F0F] rounded-lg text-xs font-semibold hover:bg-[#D4EB5A] transition-colors shrink-0"
             >
               + Neu
             </button>
@@ -50,18 +77,22 @@ export default function DokumentePage() {
 
           {loading ? (
             <div className="grid grid-cols-3 gap-4">
-              {[1,2,3,4,5,6].map((i) => <div key={i} className="h-24 bg-[#1A1A1A] rounded-xl animate-pulse" />)}
+              {[1,2,3,4,5,6].map((i) => <div key={i} className="h-28 bg-[#1A1A1A] rounded-xl animate-pulse" />)}
             </div>
-          ) : documents.length === 0 ? (
+          ) : filtered.length === 0 ? (
             <div className="bg-[#111111] border border-[#1E1E1E] rounded-xl p-10 text-center">
-              <p className="text-[#555555] text-sm mb-4">Noch nichts hier.</p>
-              <button onClick={() => setModalOpen(true)} className="px-4 py-2 bg-[#E8FF6B] text-[#0F0F0F] rounded-lg text-xs font-semibold hover:bg-[#D4EB5A] transition-colors">
-                Erstes Dokument erstellen
-              </button>
+              <p className="text-[#555555] text-sm mb-4">
+                {search ? `Keine Treffer für "${search}".` : "Noch nichts hier."}
+              </p>
+              {!search && (
+                <button onClick={() => setModalOpen(true)} className="px-4 py-2 bg-[#E8FF6B] text-[#0F0F0F] rounded-lg text-xs font-semibold hover:bg-[#D4EB5A] transition-colors">
+                  Erstes Dokument erstellen
+                </button>
+              )}
             </div>
           ) : (
             <div className="grid grid-cols-3 gap-4">
-              {documents.map((doc) => <DocumentCard key={doc.id} doc={doc} />)}
+              {filtered.map((doc) => <DocumentCard key={doc.id} doc={doc} />)}
             </div>
           )}
         </div>

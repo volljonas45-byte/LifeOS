@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { Topbar } from "@/components/layout/Topbar";
 import { LogWorkoutModal } from "@/components/sport/LogWorkoutModal";
+import { WorkoutHeatmap } from "@/components/sport/WorkoutHeatmap";
 import { useWorkouts } from "@/lib/hooks/useWorkouts";
 import { formatDate } from "@/lib/utils/dates";
 
@@ -27,6 +28,12 @@ export default function SportPage() {
           <StatCard label="Gesamt" value={workouts.length} unit="Einträge" />
           <StatCard label="Volumen (20)" value={totalVolume > 0 ? `${(totalVolume / 1000).toFixed(1)}t` : "–"} />
         </div>
+
+        {!loading && workouts.length > 0 && (
+          <div className="mb-6">
+            <WorkoutHeatmap workouts={workouts} />
+          </div>
+        )}
 
         <div className="flex items-center justify-between mb-5">
           <h2 className="text-[10px] font-semibold text-[#444444] uppercase tracking-[0.12em]">
