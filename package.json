@@ -12,6 +12,7 @@
     "@base-ui/react": "^1.4.1",
     "@supabase/ssr": "^0.10.3",
     "@supabase/supabase-js": "^2.105.4",
+    "@tiptap/extension-bubble-menu": "^3.23.1",
     "@tiptap/extension-code-block-lowlight": "^3.23.1",
     "@tiptap/extension-color": "^3.23.1",
     "@tiptap/extension-highlight": "^3.23.1",
