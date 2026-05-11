@@ -131,3 +131,53 @@
 ::-webkit-scrollbar-track { background: #0F0F0F; }
 ::-webkit-scrollbar-thumb { background: #2A2A2A; border-radius: 3px; }
 ::-webkit-scrollbar-thumb:hover { background: #333; }
+
+/* Tiptap Rich Editor */
+.tiptap-editor {
+  font-size: 1rem;
+  line-height: 1.75;
+  color: #DDDDDD;
+}
+.tiptap-editor p { margin-bottom: 0.75rem; }
+.tiptap-editor h1 { font-size: 2rem; font-weight: 700; color: #EDEDED; margin: 1.5rem 0 0.75rem; font-family: var(--font-playfair), serif; line-height: 1.2; }
+.tiptap-editor h2 { font-size: 1.4rem; font-weight: 600; color: #EDEDED; margin: 1.25rem 0 0.5rem; }
+.tiptap-editor h3 { font-size: 1.1rem; font-weight: 600; color: #CCCCCC; margin: 1rem 0 0.4rem; letter-spacing: 0.02em; }
+.tiptap-editor strong { color: #F0F0F0; font-weight: 700; }
+.tiptap-editor em { font-style: italic; color: #CCCCCC; }
+.tiptap-editor u { text-decoration: underline; text-underline-offset: 3px; }
+.tiptap-editor s { text-decoration: line-through; color: #888888; }
+.tiptap-editor code { font-family: var(--font-geist-mono), monospace; font-size: 0.85em; background: #1E1E1E; border: 1px solid #2A2A2A; color: #E8FF6B; padding: 0.1em 0.35em; border-radius: 4px; }
+.tiptap-editor pre { background: #131313; border: 1px solid #2A2A2A; border-radius: 8px; padding: 1rem 1.25rem; margin: 1rem 0; overflow-x: auto; }
+.tiptap-editor pre code { background: none; border: none; padding: 0; color: #A8FF78; font-size: 0.875rem; }
+.tiptap-editor blockquote { border-left: 3px solid #E8FF6B; padding-left: 1rem; margin: 1rem 0; color: #999999; font-style: italic; }
+.tiptap-editor hr { border: none; border-top: 1px solid #2A2A2A; margin: 1.5rem 0; }
+.tiptap-editor ul { list-style: disc; padding-left: 1.5rem; margin-bottom: 0.75rem; }
+.tiptap-editor ol { list-style: decimal; padding-left: 1.5rem; margin-bottom: 0.75rem; }
+.tiptap-editor li { margin-bottom: 0.25rem; }
+.tiptap-editor ul[data-type="taskList"] { list-style: none; padding-left: 0; }
+.tiptap-editor ul[data-type="taskList"] li { display: flex; align-items: flex-start; gap: 0.5rem; }
+.tiptap-editor ul[data-type="taskList"] li > label { margin-top: 0.2rem; }
+.tiptap-editor ul[data-type="taskList"] li > label input[type="checkbox"] { accent-color: #E8FF6B; width: 15px; height: 15px; cursor: pointer; }
+.tiptap-editor ul[data-type="taskList"] li[data-checked="true"] > div { text-decoration: line-through; color: #555555; }
+.tiptap-editor img { max-width: 100%; border-radius: 8px; border: 1px solid #2A2A2A; margin: 1rem 0; }
+.tiptap-editor a { color: #4D9EFF; text-decoration: underline; text-underline-offset: 2px; }
+.tiptap-editor mark { background: #E8FF6B33; color: #E8FF6B; border-radius: 2px; padding: 0 2px; }
+
+/* Tiptap Placeholder */
+.tiptap-editor p.is-editor-empty:first-child::before {
+  content: attr(data-placeholder);
+  color: #444444;
+  pointer-events: none;
+  float: left;
+  height: 0;
+}
+
+/* Tiptap Table */
+.tiptap-editor table { border-collapse: collapse; width: 100%; margin: 1rem 0; }
+.tiptap-editor th { background: #1A1A1A; color: #AAAAAA; font-size: 0.75rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; padding: 0.5rem 0.75rem; border: 1px solid #2A2A2A; text-align: left; }
+.tiptap-editor td { padding: 0.5rem 0.75rem; border: 1px solid #222222; color: #DDDDDD; vertical-align: top; min-width: 80px; }
+.tiptap-editor tr:hover td { background: #161616; }
+.tiptap-editor .selectedCell { background: #1A1E0A !important; outline: 2px solid #E8FF6B; }
+
+/* Selection */
+.tiptap-editor .ProseMirror-selectednode { outline: 2px solid #E8FF6B; border-radius: 4px; }
