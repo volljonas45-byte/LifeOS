@@ -65,14 +65,11 @@ export function Sidebar() {
     <aside className="w-56 shrink-0 border-r border-[#1A1A1A] bg-[#080808] flex flex-col min-h-screen">
       {/* Logo */}
       <div className="px-5 pt-7 pb-8">
-        <div className="flex items-center gap-2.5">
-          <div className="w-7 h-7 rounded-lg bg-[#E8FF6B] flex items-center justify-center shrink-0">
-            <span className="text-[11px] font-black text-black tracking-tighter">LOS</span>
+        <div className="flex items-center gap-3">
+          <div className="w-8 h-8 rounded-xl bg-[#E8FF6B] flex items-center justify-center shrink-0">
+            <span className="text-[13px] font-black text-black">L</span>
           </div>
-          <div>
-            <p className="font-display text-base font-semibold text-[#EDEDED] leading-none tracking-tight">LifeOS</p>
-            <p className="text-[9px] text-[#333333] leading-none mt-0.5 tracking-widest uppercase">2026</p>
-          </div>
+          <span className="font-display text-lg font-semibold text-[#EDEDED] tracking-tight">LifeOS</span>
         </div>
       </div>
 
