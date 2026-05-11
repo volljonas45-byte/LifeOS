@@ -519,7 +519,7 @@ export function RichEditor({ content, onChange, placeholder }: RichEditorProps) 
   });
 
   useEffect(() => {
-    function close() { setContextMenu((m) => ({ ...m, visible: false })); setSlashOpen(false); }
+    function close() { setSlashOpen(false); }
     window.addEventListener("mousedown", close);
     return () => window.removeEventListener("mousedown", close);
   }, []);
@@ -557,13 +557,59 @@ export function RichEditor({ content, onChange, placeholder }: RichEditorProps) 
     setContextMenu({ x, y, visible: true });
   }
 
+  // State for format bar dropdowns
+  const [openDrop, setOpenDrop] = useState<string | null>(null);
+  const formatBarRef = useRef<HTMLDivElement | null>(null);
+
+  // Close all dropdowns + context menu when clicking outside
+  useEffect(() => {
+    function onDown(e: MouseEvent) {
+      // Close context menu unless click is inside it
+      setContextMenu((m) => {
+        if (!m.visible) return m;
+        return { ...m, visible: false };
+      });
+      // Close format-bar dropdowns unless click is inside the bar
+      if (!formatBarRef.current?.contains(e.target as Node)) {
+        setOpenDrop(null);
+      }
+    }
+    document.addEventListener("mousedown", onDown);
+    return () => document.removeEventListener("mousedown", onDown);
+  }, []);
+
+  function toggleDrop(name: string) {
+    setOpenDrop((v) => (v === name ? null : name));
+  }
+
   if (!editor) return null;
 
-  // Active format state (for the status bar)
   const activeFont = FONT_OPTIONS.find((f) => editor.isActive("textStyle", { fontFamily: f.value }));
   const activeSize = editor.getAttributes("textStyle").fontSize ?? null;
   const activeTextColor = editor.getAttributes("textStyle").color ?? null;
   const activeHighlight = editor.getAttributes("highlight").color ?? null;
+
+  function barDrop(name: string, label: React.ReactNode, children: React.ReactNode) {
+    return (
+      <div className="relative">
+        <button
+          type="button"
+          onMouseDown={(e) => { e.preventDefault(); toggleDrop(name); }}
+          className={`flex items-center gap-1 px-2 py-1 rounded-md text-[11px] transition-colors whitespace-nowrap ${
+            openDrop === name ? "bg-[#1E1E1E] text-[#EDEDED]" : "text-[#666] hover:text-[#BBBBBB] hover:bg-[#181818]"
+          }`}
+        >
+          {label}
+          <span className="text-[#3A3A3A] text-[9px]">▾</span>
+        </button>
+        {openDrop === name && (
+          <div className="absolute top-full mt-1 left-0 bg-[#161616] border border-[#2A2A2A] rounded-xl shadow-2xl p-1 z-50 min-w-[160px]">
+            {children}
+          </div>
+        )}
+      </div>
+    );
+  }
 
   return (
     <div className="flex flex-col">
@@ -582,122 +628,139 @@ export function RichEditor({ content, onChange, placeholder }: RichEditorProps) 
       />
       <input ref={fileInputRef} type="file" accept="image/*" className="hidden" onChange={handleImageFile} />
 
-      {/* ── Permanent format status bar ── */}
-      <div className="flex flex-wrap items-center gap-1.5 mb-5 p-2 bg-[#111111] border border-[#1E1E1E] rounded-xl">
-        {/* Font family */}
-        <div className="relative group">
-          <button
-            type="button"
-            onMouseDown={(e) => { e.preventDefault(); editor.commands.focus(); }}
-            className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs text-[#888888] hover:text-[#CCCCCC] hover:bg-[#1A1A1A] transition-colors"
-            title="Schriftart — wähle Text aus oder klicke zum Voraus-Setzen"
-          >
-            <span style={{ fontFamily: activeFont?.value ?? "inherit" }}>
-              {activeFont?.label.split(" ")[0] ?? "Standard"}
-            </span>
-            <span className="text-[#444]">▾</span>
-          </button>
-          <div className="absolute top-full mt-1 left-0 hidden group-focus-within:block bg-[#161616] border border-[#2A2A2A] rounded-xl shadow-2xl p-1 min-w-[180px] z-50">
+      {/* ── Compact format bar ── */}
+      <div
+        ref={formatBarRef}
+        className="flex items-center gap-0.5 mb-4 px-1 py-1 bg-[#0F0F0F] border border-[#1A1A1A] rounded-lg"
+        onMouseDown={(e) => e.stopPropagation()}
+      >
+        {/* Schriftart */}
+        {barDrop("font",
+          <span style={{ fontFamily: activeFont?.value ?? "inherit" }}>
+            {activeFont?.label.split(" ")[0] ?? "Standard"}
+          </span>,
+          <>
             {FONT_OPTIONS.map((f) => (
               <button key={f.value} type="button"
-                onMouseDown={(e) => { e.preventDefault(); editor.chain().focus().setFontFamily(f.value).run(); }}
+                onMouseDown={(e) => { e.preventDefault(); editor.chain().focus().setFontFamily(f.value).run(); setOpenDrop(null); }}
                 style={{ fontFamily: f.value }}
-                className={`w-full text-left px-3 py-1.5 text-sm rounded-lg transition-colors ${activeFont?.value === f.value ? "text-[#E8FF6B] bg-[#1A1E0A]" : "text-[#CCCCCC] hover:bg-[#222]"}`}>
+                className={`w-full text-left px-3 py-1.5 text-sm rounded-lg transition-colors ${activeFont?.value === f.value ? "text-[#E8FF6B]" : "text-[#CCCCCC] hover:bg-[#222]"}`}>
                 {f.label}
               </button>
             ))}
             <div className="border-t border-[#222] my-1" />
-            <button type="button" onMouseDown={(e) => { e.preventDefault(); editor.chain().focus().unsetFontFamily().run(); }}
-              className="w-full text-left px-3 py-1.5 text-xs text-[#555] hover:text-[#AAA] hover:bg-[#222] rounded-lg">
+            <button type="button" onMouseDown={(e) => { e.preventDefault(); editor.chain().focus().unsetFontFamily().run(); setOpenDrop(null); }}
+              className="w-full text-left px-3 py-1 text-[10px] text-[#555] hover:text-[#AAA] hover:bg-[#1A1A1A] rounded-lg">
               Zurücksetzen
             </button>
-          </div>
-        </div>
+          </>
+        )}
 
-        <div className="w-px h-3.5 bg-[#222]" />
+        <div className="w-px h-3 bg-[#1E1E1E] mx-0.5" />
 
-        {/* Font size */}
-        <div className="relative group">
-          <button
-            type="button"
-            onMouseDown={(e) => { e.preventDefault(); editor.commands.focus(); }}
-            className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs text-[#888888] hover:text-[#CCCCCC] hover:bg-[#1A1A1A] transition-colors"
-            title="Schriftgröße"
-          >
-            {activeSize ? `${activeSize}px` : "Normal"}
-            <span className="text-[#444]">▾</span>
-          </button>
-          <div className="absolute top-full mt-1 left-0 hidden group-focus-within:block bg-[#161616] border border-[#2A2A2A] rounded-xl shadow-2xl p-1 min-w-[130px] z-50">
+        {/* Schriftgröße */}
+        {barDrop("size",
+          <span>{activeSize ? `${activeSize}px` : "Normal"}</span>,
+          <>
             {SIZE_OPTIONS.map((s) => (
               <button key={s.value} type="button"
-                onMouseDown={(e) => { e.preventDefault(); (editor.chain().focus() as any).setFontSize(s.value).run(); }}
-                className={`w-full text-left px-3 py-1.5 rounded-lg transition-colors ${activeSize === s.value ? "text-[#E8FF6B] bg-[#1A1E0A]" : "text-[#CCCCCC] hover:bg-[#222]"}`}
+                onMouseDown={(e) => { e.preventDefault(); (editor.chain().focus() as any).setFontSize(s.value).run(); setOpenDrop(null); }}
+                className={`w-full text-left px-3 py-1.5 rounded-lg transition-colors ${activeSize === s.value ? "text-[#E8FF6B]" : "text-[#CCCCCC] hover:bg-[#222]"}`}
                 style={{ fontSize: `${s.value}px` }}>
                 {s.label}
               </button>
             ))}
             <div className="border-t border-[#222] my-1" />
-            <button type="button" onMouseDown={(e) => { e.preventDefault(); (editor.chain().focus() as any).unsetFontSize().run(); }}
-              className="w-full text-left px-3 py-1.5 text-xs text-[#555] hover:text-[#AAA] hover:bg-[#222] rounded-lg">
+            <button type="button" onMouseDown={(e) => { e.preventDefault(); (editor.chain().focus() as any).unsetFontSize().run(); setOpenDrop(null); }}
+              className="w-full text-left px-3 py-1 text-[10px] text-[#555] hover:text-[#AAA] hover:bg-[#1A1A1A] rounded-lg">
               Zurücksetzen
             </button>
-          </div>
+          </>
+        )}
+
+        <div className="w-px h-3 bg-[#1E1E1E] mx-0.5" />
+
+        {/* Text color */}
+        <div className="relative">
+          <button type="button"
+            onMouseDown={(e) => { e.preventDefault(); toggleDrop("color"); }}
+            className={`flex items-center gap-1.5 px-2 py-1 rounded-md text-[11px] transition-colors ${openDrop === "color" ? "bg-[#1E1E1E] text-[#EDEDED]" : "text-[#666] hover:text-[#BBBBBB] hover:bg-[#181818]"}`}
+            title="Schriftfarbe"
+          >
+            <span className="w-3 h-3 rounded-full border border-[#333]" style={{ background: activeTextColor ?? "#DDDDDD" }} />
+            <span className="text-[9px] text-[#3A3A3A]">▾</span>
+          </button>
+          {openDrop === "color" && (
+            <div className="absolute top-full mt-1 left-0 bg-[#161616] border border-[#2A2A2A] rounded-xl shadow-2xl p-2 z-50 w-[168px]">
+              <div className="text-[9px] text-[#444] uppercase tracking-wider pb-1.5">Schriftfarbe</div>
+              <div className="grid grid-cols-5 gap-1.5 mb-2">
+                {TEXT_COLORS.map((c) => (
+                  <button key={c.label} type="button" title={c.label}
+                    onMouseDown={(e) => { e.preventDefault(); if (c.value) editor.chain().focus().setColor(c.value).run(); else editor.chain().focus().unsetColor().run(); setOpenDrop(null); }}
+                    className="w-7 h-7 rounded-lg border transition-transform hover:scale-110"
+                    style={{ background: c.swatch, borderColor: c.value ? "transparent" : "#444", outline: activeTextColor === c.value ? "2px solid #E8FF6B" : "none", outlineOffset: "1px" }} />
+                ))}
+              </div>
+              <button type="button" onMouseDown={(e) => { e.preventDefault(); editor.chain().focus().unsetColor().run(); setOpenDrop(null); }}
+                className="w-full text-left px-2 py-1 text-[10px] text-[#555] hover:text-[#AAA] rounded">
+                Zurücksetzen
+              </button>
+            </div>
+          )}
         </div>
 
-        <div className="w-px h-3.5 bg-[#222]" />
+        {/* Highlight color */}
+        <div className="relative">
+          <button type="button"
+            onMouseDown={(e) => { e.preventDefault(); toggleDrop("highlight"); }}
+            className={`flex items-center gap-1.5 px-2 py-1 rounded-md text-[11px] transition-colors ${openDrop === "highlight" ? "bg-[#1E1E1E] text-[#EDEDED]" : "text-[#666] hover:text-[#BBBBBB] hover:bg-[#181818]"}`}
+            title="Textmarker"
+          >
+            <span className="w-3 h-3 rounded-sm border" style={{ background: activeHighlight ?? "transparent", borderColor: activeHighlight ? "transparent" : "#444" }} />
+            <span className="text-[9px] text-[#3A3A3A]">▾</span>
+          </button>
+          {openDrop === "highlight" && (
+            <div className="absolute top-full mt-1 left-0 bg-[#161616] border border-[#2A2A2A] rounded-xl shadow-2xl p-2 z-50 w-[168px]">
+              <div className="text-[9px] text-[#444] uppercase tracking-wider pb-1.5">Textmarker</div>
+              <div className="grid grid-cols-5 gap-1.5 mb-2">
+                {HIGHLIGHT_COLORS.map((c) => (
+                  <button key={c.label} type="button" title={c.label}
+                    onMouseDown={(e) => { e.preventDefault(); if (c.value) editor.chain().focus().setHighlight({ color: c.value }).run(); else editor.chain().focus().unsetHighlight().run(); setOpenDrop(null); }}
+                    className="w-7 h-7 rounded-lg border transition-transform hover:scale-110"
+                    style={{ background: c.swatch, borderColor: (c as any).border ?? (c.value ? "transparent" : "#444"), outline: activeHighlight === c.value ? "2px solid #E8FF6B" : "none", outlineOffset: "1px" }} />
+                ))}
+              </div>
+              <button type="button" onMouseDown={(e) => { e.preventDefault(); editor.chain().focus().unsetHighlight().run(); setOpenDrop(null); }}
+                className="w-full text-left px-2 py-1 text-[10px] text-[#555] hover:text-[#AAA] rounded">
+                Zurücksetzen
+              </button>
+            </div>
+          )}
+        </div>
 
-        {/* Text color swatch */}
-        <ColorPicker
-          label="Farbe"
-          colors={TEXT_COLORS}
-          currentColor={activeTextColor}
-          onSelect={(val) => {
-            if (val) editor.chain().focus().setColor(val).run();
-            else editor.chain().focus().unsetColor().run();
-          }}
-        />
+        <div className="w-px h-3 bg-[#1E1E1E] mx-0.5" />
 
-        {/* Highlight swatch */}
-        <ColorPicker
-          label="Marker"
-          colors={HIGHLIGHT_COLORS}
-          currentColor={activeHighlight}
-          onSelect={(val) => {
-            if (val) editor.chain().focus().setHighlight({ color: val }).run();
-            else editor.chain().focus().unsetHighlight().run();
-          }}
-        />
-
-        <div className="w-px h-3.5 bg-[#222]" />
-
-        {/* Quick format toggles */}
+        {/* F K U toggles */}
         {[
-          { label: "F", title: "Fett", action: () => editor.chain().focus().toggleBold().run(), active: editor.isActive("bold"), style: { fontWeight: 700 } },
-          { label: "K", title: "Kursiv", action: () => editor.chain().focus().toggleItalic().run(), active: editor.isActive("italic"), style: { fontStyle: "italic" } },
-          { label: "U", title: "Unterstrichen", action: () => editor.chain().focus().toggleUnderline().run(), active: editor.isActive("underline"), style: { textDecoration: "underline" } },
+          { id: "bold",      label: "F", title: "Fett",          action: () => editor.chain().focus().toggleBold().run(),      active: editor.isActive("bold"),      fw: 700 },
+          { id: "italic",    label: "K", title: "Kursiv",        action: () => editor.chain().focus().toggleItalic().run(),    active: editor.isActive("italic"),    fi: "italic" },
+          { id: "underline", label: "U", title: "Unterstrichen", action: () => editor.chain().focus().toggleUnderline().run(), active: editor.isActive("underline"), td: "underline" },
         ].map((b) => (
-          <button key={b.title} type="button"
+          <button key={b.id} type="button"
             onMouseDown={(e) => { e.preventDefault(); b.action(); }}
             title={b.title}
-            className={`px-2 py-1 rounded-lg text-xs transition-colors ${b.active ? "bg-[#E8FF6B] text-[#0F0F0F]" : "text-[#666] hover:text-[#CCC] hover:bg-[#1A1A1A]"}`}
-            style={b.style}>
+            className={`w-7 h-7 flex items-center justify-center rounded-md text-xs transition-colors ${b.active ? "bg-[#E8FF6B] text-[#0F0F0F]" : "text-[#555] hover:text-[#CCC] hover:bg-[#181818]"}`}
+            style={{ fontWeight: (b as any).fw, fontStyle: (b as any).fi, textDecoration: (b as any).td }}>
             {b.label}
           </button>
         ))}
-
-        {/* Hint */}
-        <span className="ml-auto text-[9px] text-[#2A2A2A]">
-          Text markieren → Toolbar · <kbd className="font-mono">/</kbd> Blöcke · Rechtsklick → Menü
-        </span>
       </div>
 
-      {/* Editor — click to close floating toolbar */}
+      {/* Editor */}
       <div
         onContextMenu={handleContextMenu}
         onMouseDown={(e) => e.stopPropagation()}
         onClick={() => {
-          // Close floating toolbar if no selection active
-          if (!editor) return;
           const { from, to } = editor.state.selection;
           if (from === to) setBubble((b) => ({ ...b, visible: false }));
         }}
