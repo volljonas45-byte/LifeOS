@@ -8,15 +8,19 @@ interface AddHabitModalProps {
   open: boolean;
   onClose: () => void;
   onAdd: (habit: Omit<Habit, "id" | "user_id" | "created_at">) => Promise<void>;
+  defaultType?: HabitType;
 }
 
 const CATEGORIES = ["Sport", "Meditation", "Weiterbildung", "Gesundheit", "Finanzen", "Sonstiges"];
 
-export function AddHabitModal({ open, onClose, onAdd }: AddHabitModalProps) {
+export function AddHabitModal({ open, onClose, onAdd, defaultType = "habit" }: AddHabitModalProps) {
   const [name, setName] = useState("");
   const [category, setCategory] = useState("");
   const [frequency, setFrequency] = useState<HabitFrequency>("daily");
-  const [type, setType] = useState<HabitType>("habit");
+  const [type, setType] = useState<HabitType>(defaultType);
+
+  // Sync defaultType when modal opens
+  useState(() => { setType(defaultType); });
   const [loading, setLoading] = useState(false);
 
   async function handleSubmit(e: React.FormEvent) {

@@ -5,9 +5,10 @@ import { createClient } from "@/lib/supabase/client";
 
 interface HabitStreakBadgeProps {
   habitId: string;
+  color?: string;
 }
 
-export function HabitStreakBadge({ habitId }: HabitStreakBadgeProps) {
+export function HabitStreakBadge({ habitId, color }: HabitStreakBadgeProps) {
   const [streak, setStreak] = useState<number | null>(null);
 
   useEffect(() => {
@@ -28,11 +29,8 @@ export function HabitStreakBadge({ habitId }: HabitStreakBadgeProps) {
       const d = new Date();
       d.setHours(0, 0, 0, 0);
 
-      // Count backwards from today (or yesterday if today not done)
       const todayStr = d.toISOString().slice(0, 10);
-      if (!dates.has(todayStr)) {
-        d.setDate(d.getDate() - 1);
-      }
+      if (!dates.has(todayStr)) d.setDate(d.getDate() - 1);
 
       while (true) {
         const str = d.toISOString().slice(0, 10);
@@ -49,7 +47,7 @@ export function HabitStreakBadge({ habitId }: HabitStreakBadgeProps) {
   if (streak === null || streak === 0) return null;
 
   return (
-    <span className="flex items-center gap-0.5 text-[10px] text-[#FB923C] font-medium tabular-nums">
+    <span className="flex items-center gap-0.5 text-xs font-bold tabular-nums" style={{ color: color ?? "#FB923C" }}>
       🔥{streak}
     </span>
   );
