@@ -5,13 +5,13 @@ import { cn } from "@/lib/utils";
 import type { Goal, GoalStatus } from "@/lib/types";
 
 const STATUS_CONFIG: Record<GoalStatus, { label: string; color: string; dot: string }> = {
-  achieved:    { label: "Erreicht",  color: "text-[#4ADE80]", dot: "bg-[#4ADE80]" },
-  on_track:    { label: "On Track",  color: "text-[#4D9EFF]", dot: "bg-[#4D9EFF]" },
-  at_risk:     { label: "At Risk",   color: "text-[#FB923C]", dot: "bg-[#FB923C]" },
-  not_started: { label: "Offen",     color: "text-[#555555]", dot: "bg-[#333333]" },
+  achieved:    { label: "Erreicht",  color: "#4ADE80", dot: "#4ADE80" },
+  on_track:    { label: "On Track",  color: "#4D9EFF", dot: "#4D9EFF" },
+  at_risk:     { label: "At Risk",   color: "#FB923C", dot: "#FB923C" },
+  not_started: { label: "Offen",     color: "#444444", dot: "#2A2A2A" },
 };
 
-const GOAL_ACCENTS = ["#E8FF6B", "#4D9EFF", "#4ADE80"];
+export const GOAL_ACCENTS = ["#E8FF6B", "#4D9EFF", "#4ADE80"];
 
 interface GoalCardProps {
   goal: Goal;
@@ -23,10 +23,31 @@ interface GoalCardProps {
   onDeleteGoal: (id: string) => Promise<void>;
 }
 
+/* SVG Ring Progress — 44px viewbox */
+function RingProgress({ progress, accent, size = 52 }: { progress: number; accent: string; size?: number }) {
+  const r = 18;
+  const circ = 2 * Math.PI * r;
+  const dash = (progress / 100) * circ;
+  return (
+    <svg width={size} height={size} viewBox="0 0 44 44" style={{ transform: "rotate(-90deg)" }}>
+      <circle cx="22" cy="22" r={r} fill="none" stroke="#1A1A1A" strokeWidth="3" />
+      <circle
+        cx="22" cy="22" r={r}
+        fill="none"
+        stroke={accent}
+        strokeWidth="3"
+        strokeDasharray={`${dash} ${circ}`}
+        strokeLinecap="round"
+        style={{ transition: "stroke-dasharray 0.5s ease" }}
+      />
+    </svg>
+  );
+}
+
 export function GoalCard({ goal, index, isSelected, onSelect, onUpdateStatus, onUpdateGoal, onDeleteGoal }: GoalCardProps) {
   const [editingTitle, setEditingTitle] = useState(false);
   const [titleDraft, setTitleDraft] = useState(goal.title);
-  const [showActions, setShowActions] = useState(false);
+  const [hovered, setHovered] = useState(false);
 
   const milestones = goal.milestones ?? [];
   const done = milestones.filter((m) => m.status === "achieved").length;
@@ -46,44 +67,45 @@ export function GoalCard({ goal, index, isSelected, onSelect, onUpdateStatus, on
   return (
     <div
       onClick={onSelect}
-      onMouseEnter={() => setShowActions(true)}
-      onMouseLeave={() => setShowActions(false)}
+      onMouseEnter={() => setHovered(true)}
+      onMouseLeave={() => setHovered(false)}
       className={cn(
-        "relative group cursor-pointer rounded-2xl border p-5 flex flex-col gap-4 transition-all duration-200",
+        "relative cursor-pointer rounded-2xl border p-5 flex flex-col gap-4 transition-all duration-200",
         isSelected
-          ? "border-[#2A2A2A] bg-[#151515] shadow-lg shadow-black/40"
-          : "border-[#1A1A1A] bg-[#111111] hover:border-[#252525] hover:bg-[#131313]"
+          ? "border-[#252525] bg-[#111111]"
+          : "border-[#161616] bg-[#0C0C0C] hover:border-[#222222] hover:bg-[#0F0F0F]"
       )}
+      style={isSelected ? { boxShadow: `0 0 0 1px ${accent}18, 0 8px 32px rgba(0,0,0,0.5)` } : {}}
     >
-      {/* Selected indicator stripe */}
+      {/* Accent top border when selected */}
       {isSelected && (
         <div
-          className="absolute left-0 top-4 bottom-4 w-0.5 rounded-r-full"
-          style={{ background: accent }}
+          className="absolute inset-x-0 top-0 h-px rounded-t-2xl"
+          style={{ background: `linear-gradient(90deg, transparent, ${accent}60, transparent)` }}
         />
       )}
 
-      {/* Header */}
-      <div className="flex items-start justify-between gap-2">
+      {/* Header row: index badge + actions */}
+      <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
           <span
-            className="w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-bold shrink-0"
-            style={{ background: `${accent}18`, color: accent, border: `1px solid ${accent}30` }}
+            className="text-[10px] font-bold px-2 py-0.5 rounded-md"
+            style={{ background: `${accent}12`, color: accent }}
           >
-            {index + 1}
+            ZIEL {index + 1}
           </span>
-          <span className="text-[10px] text-[#444444] uppercase tracking-widest font-medium">Ziel</span>
         </div>
 
-        {/* Actions */}
+        {/* Actions on hover */}
         <div
-          className={cn("flex items-center gap-2 transition-opacity", showActions ? "opacity-100" : "opacity-0")}
+          className={cn("flex items-center gap-2 transition-all duration-150", hovered ? "opacity-100" : "opacity-0")}
           onClick={(e) => e.stopPropagation()}
         >
           <select
             value={goal.status}
             onChange={(e) => onUpdateStatus(goal.id, e.target.value as GoalStatus)}
-            className="bg-transparent text-[10px] text-[#555555] border-0 outline-none cursor-pointer hover:text-[#888888] transition-colors"
+            className="bg-transparent text-[10px] border-0 outline-none cursor-pointer"
+            style={{ color: cfg.color }}
           >
             {(Object.keys(STATUS_CONFIG) as GoalStatus[]).map((s) => (
               <option key={s} value={s} className="bg-[#111111] text-[#EDEDED]">
@@ -93,7 +115,7 @@ export function GoalCard({ goal, index, isSelected, onSelect, onUpdateStatus, on
           </select>
           <button
             onClick={() => { if (confirm(`"${goal.title}" löschen?`)) onDeleteGoal(goal.id); }}
-            className="text-[#2A2A2A] hover:text-[#F87171] transition-colors text-base leading-none"
+            className="text-[#2A2A2A] hover:text-[#F87171] transition-colors leading-none text-base"
           >
             ×
           </button>
@@ -101,55 +123,70 @@ export function GoalCard({ goal, index, isSelected, onSelect, onUpdateStatus, on
       </div>
 
       {/* Title */}
-      <div onClick={(e) => e.stopPropagation()}>
+      <div className="flex-1" onClick={(e) => e.stopPropagation()}>
         {editingTitle ? (
           <input
             autoFocus
             value={titleDraft}
             onChange={(e) => setTitleDraft(e.target.value)}
             onBlur={commitTitle}
-            onKeyDown={(e) => { if (e.key === "Enter") commitTitle(); if (e.key === "Escape") { setEditingTitle(false); setTitleDraft(goal.title); } }}
-            className="w-full bg-transparent border-b border-[#E8FF6B]/30 outline-none text-lg font-semibold text-[#EDEDED] font-display leading-snug pb-0.5"
+            onKeyDown={(e) => {
+              if (e.key === "Enter") commitTitle();
+              if (e.key === "Escape") { setEditingTitle(false); setTitleDraft(goal.title); }
+            }}
+            className="w-full bg-transparent border-b border-[#E8FF6B]/30 outline-none text-[17px] font-semibold text-[#EDEDED] leading-snug pb-0.5"
           />
         ) : (
           <h3
-            className="font-display text-lg font-semibold text-[#EDEDED] leading-snug cursor-text"
+            className="font-semibold text-[17px] text-[#E0E0E0] leading-snug cursor-text"
             onDoubleClick={(e) => { e.stopPropagation(); setEditingTitle(true); setTitleDraft(goal.title); }}
+            title="Doppelklick zum Bearbeiten"
           >
             {goal.title}
           </h3>
         )}
       </div>
 
-      {/* Progress + status */}
-      <div className="mt-auto space-y-2.5">
-        {milestones.length > 0 && (
-          <>
-            <div className="w-full h-1 bg-[#1A1A1A] rounded-full overflow-hidden">
+      {/* Bottom: ring + stats */}
+      <div className="flex items-center gap-4">
+        {/* Milestone pills */}
+        <div className="flex gap-1.5 flex-1">
+          {[0, 1, 2].map((i) => {
+            const ms = milestones[i];
+            const filled = !!ms;
+            const achieved = ms?.status === "achieved";
+            const atRisk = ms?.status === "at_risk";
+            const onTrack = ms?.status === "on_track";
+            const pillColor = achieved ? "#4ADE80" : atRisk ? "#FB923C" : onTrack ? "#4D9EFF" : filled ? accent : "#1A1A1A";
+            return (
               <div
-                className="h-full rounded-full transition-all duration-500"
-                style={{ width: `${progress}%`, background: accent }}
+                key={i}
+                className="flex-1 h-1.5 rounded-full transition-all duration-300"
+                style={{ background: filled ? `${pillColor}${achieved ? "FF" : "60"}` : "#1A1A1A" }}
+                title={ms?.title}
               />
-            </div>
-            <div className="flex items-center justify-between">
-              <span className="text-[10px] text-[#444444]">
-                {done}/{milestones.length} Meilensteine
-              </span>
-              <span className={cn("text-[10px] font-medium flex items-center gap-1", cfg.color)}>
-                <span className={cn("w-1.5 h-1.5 rounded-full", cfg.dot)} />
-                {cfg.label}
-              </span>
-            </div>
-          </>
-        )}
-        {milestones.length === 0 && (
-          <div className="flex items-center justify-between">
-            <span className="text-[10px] text-[#333333]">Klicken um Details zu sehen</span>
-            <span className={cn("text-[10px] font-medium flex items-center gap-1", cfg.color)}>
-              <span className={cn("w-1.5 h-1.5 rounded-full", cfg.dot)} />
-              {cfg.label}
-            </span>
+            );
+          })}
+        </div>
+
+        {/* Ring */}
+        <div className="relative shrink-0">
+          <RingProgress progress={progress} accent={accent} size={48} />
+          <div className="absolute inset-0 flex items-center justify-center">
+            <span className="text-[10px] font-bold tabular-nums" style={{ color: accent }}>{progress}%</span>
           </div>
+        </div>
+      </div>
+
+      {/* Status label + milestone count */}
+      <div className="flex items-center justify-between -mt-2">
+        <span className="text-[10px]" style={{ color: cfg.dot }}>
+          ● {cfg.label}
+        </span>
+        {milestones.length > 0 && (
+          <span className="text-[10px] text-[#333333]">
+            {done}/{milestones.length} erreicht
+          </span>
         )}
       </div>
     </div>
