@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Inter, Playfair_Display } from "next/font/google";
+import { Inter, Playfair_Display, Lora, Source_Code_Pro, Nunito } from "next/font/google";
 import "./globals.css";
 
 const inter = Inter({
@@ -10,6 +10,27 @@ const inter = Inter({
 
 const playfair = Playfair_Display({
   variable: "--font-playfair",
+  subsets: ["latin"],
+  display: "swap",
+  weight: ["400", "500", "600", "700"],
+});
+
+const lora = Lora({
+  variable: "--font-lora",
+  subsets: ["latin"],
+  display: "swap",
+  weight: ["400", "500", "600", "700"],
+});
+
+const sourceCodePro = Source_Code_Pro({
+  variable: "--font-source-code",
+  subsets: ["latin"],
+  display: "swap",
+  weight: ["400", "500", "600"],
+});
+
+const nunito = Nunito({
+  variable: "--font-nunito",
   subsets: ["latin"],
   display: "swap",
   weight: ["400", "500", "600", "700"],
@@ -26,7 +47,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="de" className={`${inter.variable} ${playfair.variable} h-full antialiased`}>
+    <html lang="de" className={`${inter.variable} ${playfair.variable} ${lora.variable} ${sourceCodePro.variable} ${nunito.variable} h-full antialiased`}>
       <body className="min-h-full bg-[#0F0F0F]">{children}</body>
     </html>
   );

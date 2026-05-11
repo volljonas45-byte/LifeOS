@@ -9,14 +9,45 @@ import Underline from "@tiptap/extension-underline";
 import { TextStyle } from "@tiptap/extension-text-style";
 import { Color } from "@tiptap/extension-color";
 import Highlight from "@tiptap/extension-highlight";
+import { FontFamily } from "@tiptap/extension-font-family";
 import { Table } from "@tiptap/extension-table";
 import { TableRow } from "@tiptap/extension-table-row";
 import { TableCell } from "@tiptap/extension-table-cell";
 import { TableHeader } from "@tiptap/extension-table-header";
 import TaskList from "@tiptap/extension-task-list";
 import TaskItem from "@tiptap/extension-task-item";
+import { Extension } from "@tiptap/core";
 import { useEffect, useRef, useCallback, useState } from "react";
 import type { Editor } from "@tiptap/react";
+
+// ── Custom FontSize inline mark ────────────────────────────────────────────────
+const FontSize = Extension.create({
+  name: "fontSize",
+  addOptions() { return { types: ["textStyle"] }; },
+  addGlobalAttributes() {
+    return [{
+      types: this.options.types,
+      attributes: {
+        fontSize: {
+          default: null,
+          parseHTML: (el) => el.style.fontSize?.replace("px", "") || null,
+          renderHTML: (attrs) => {
+            if (!attrs.fontSize) return {};
+            return { style: `font-size: ${attrs.fontSize}px` };
+          },
+        },
+      },
+    }];
+  },
+  addCommands() {
+    return {
+      setFontSize: (size: string) => ({ chain }: any) =>
+        chain().setMark("textStyle", { fontSize: size }).run(),
+      unsetFontSize: () => ({ chain }: any) =>
+        chain().setMark("textStyle", { fontSize: null }).removeEmptyTextStyle().run(),
+    } as any;
+  },
+});
 
 interface RichEditorProps {
   content: string;
@@ -24,10 +55,29 @@ interface RichEditorProps {
   placeholder?: string;
 }
 
+const FONT_OPTIONS = [
+  { label: "Standard (Inter)",     value: "Inter, sans-serif" },
+  { label: "Serif (Playfair)",     value: "var(--font-playfair), serif" },
+  { label: "Lesbar (Lora)",        value: "var(--font-lora), serif" },
+  { label: "Rund (Nunito)",        value: "var(--font-nunito), sans-serif" },
+  { label: "Mono (Code)",          value: "var(--font-source-code), monospace" },
+];
+
+const SIZE_OPTIONS = [
+  { label: "Klein",    value: "12" },
+  { label: "Normal",   value: "16" },
+  { label: "Groß",     value: "20" },
+  { label: "Sehr groß",value: "28" },
+  { label: "Riesig",   value: "36" },
+];
+
 // ── Floating bubble toolbar ────────────────────────────────────────────────────
 interface BubbleState { top: number; left: number; visible: boolean }
 
 function FloatingToolbar({ editor, bubble }: { editor: Editor; bubble: BubbleState }) {
+  const [showFonts, setShowFonts] = useState(false);
+  const [showSizes, setShowSizes] = useState(false);
+
   if (!bubble.visible) return null;
 
   function btn(label: string, action: () => void, active?: boolean, display?: React.ReactNode) {
@@ -46,7 +96,7 @@ function FloatingToolbar({ editor, bubble }: { editor: Editor; bubble: BubbleSta
     );
   }
 
-  function sep() { return <div className="w-px h-4 bg-[#2A2A2A] shrink-0" />; }
+  function sep() { return <div key={Math.random()} className="w-px h-4 bg-[#2A2A2A] shrink-0" />; }
 
   return (
     <div
@@ -54,19 +104,103 @@ function FloatingToolbar({ editor, bubble }: { editor: Editor; bubble: BubbleSta
       style={{ top: bubble.top, left: bubble.left, transform: "translateX(-50%)" }}
       onMouseDown={(e) => e.preventDefault()}
     >
-      {btn("Überschrift 1", () => editor.chain().focus().toggleHeading({ level: 1 }).run(), editor.isActive("heading", { level: 1 }), <span className="font-bold">H1</span>)}
-      {btn("Überschrift 2", () => editor.chain().focus().toggleHeading({ level: 2 }).run(), editor.isActive("heading", { level: 2 }), <span className="font-bold">H2</span>)}
+      {/* Font family picker */}
+      <div className="relative">
+        <button
+          type="button"
+          onMouseDown={(e) => { e.preventDefault(); setShowFonts((v) => !v); setShowSizes(false); }}
+          className="flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-xs text-[#CCCCCC] hover:text-[#EDEDED] hover:bg-[#2A2A2A] whitespace-nowrap"
+        >
+          Schriftart ▾
+        </button>
+        {showFonts && (
+          <div className="absolute top-full mt-1 left-0 bg-[#161616] border border-[#2A2A2A] rounded-xl shadow-2xl p-1 min-w-[180px] z-50">
+            {FONT_OPTIONS.map((f) => (
+              <button
+                key={f.value}
+                type="button"
+                onMouseDown={(e) => {
+                  e.preventDefault();
+                  editor.chain().focus().setFontFamily(f.value).run();
+                  setShowFonts(false);
+                }}
+                style={{ fontFamily: f.value }}
+                className="w-full text-left px-3 py-1.5 text-sm text-[#CCCCCC] hover:bg-[#222222] hover:text-[#EDEDED] rounded-lg"
+              >
+                {f.label}
+              </button>
+            ))}
+            <div className="border-t border-[#222222] my-1" />
+            <button
+              type="button"
+              onMouseDown={(e) => { e.preventDefault(); editor.chain().focus().unsetFontFamily().run(); setShowFonts(false); }}
+              className="w-full text-left px-3 py-1.5 text-xs text-[#666666] hover:bg-[#222222] hover:text-[#AAAAAA] rounded-lg"
+            >
+              Zurücksetzen
+            </button>
+          </div>
+        )}
+      </div>
+
+      {/* Font size picker */}
+      <div className="relative">
+        <button
+          type="button"
+          onMouseDown={(e) => { e.preventDefault(); setShowSizes((v) => !v); setShowFonts(false); }}
+          className="flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-xs text-[#CCCCCC] hover:text-[#EDEDED] hover:bg-[#2A2A2A] whitespace-nowrap"
+        >
+          Größe ▾
+        </button>
+        {showSizes && (
+          <div className="absolute top-full mt-1 left-0 bg-[#161616] border border-[#2A2A2A] rounded-xl shadow-2xl p-1 min-w-[140px] z-50">
+            {SIZE_OPTIONS.map((s) => (
+              <button
+                key={s.value}
+                type="button"
+                onMouseDown={(e) => {
+                  e.preventDefault();
+                  (editor.chain().focus() as any).setFontSize(s.value).run();
+                  setShowSizes(false);
+                }}
+                className="w-full text-left px-3 py-1.5 rounded-lg text-[#CCCCCC] hover:bg-[#222222] hover:text-[#EDEDED]"
+                style={{ fontSize: `${s.value}px` }}
+              >
+                {s.label}
+              </button>
+            ))}
+            <div className="border-t border-[#222222] my-1" />
+            <button
+              type="button"
+              onMouseDown={(e) => {
+                e.preventDefault();
+                (editor.chain().focus() as any).unsetFontSize().run();
+                setShowSizes(false);
+              }}
+              className="w-full text-left px-3 py-1.5 text-xs text-[#666666] hover:bg-[#222222] hover:text-[#AAAAAA] rounded-lg"
+            >
+              Zurücksetzen
+            </button>
+          </div>
+        )}
+      </div>
+
       {sep()}
+
+      {/* Text formatting */}
       {btn("Fett", () => editor.chain().focus().toggleBold().run(), editor.isActive("bold"), <strong>Fett</strong>)}
       {btn("Kursiv", () => editor.chain().focus().toggleItalic().run(), editor.isActive("italic"), <em>Kursiv</em>)}
       {btn("Unterstrichen", () => editor.chain().focus().toggleUnderline().run(), editor.isActive("underline"), <span className="underline">Unter</span>)}
       {btn("Durchgestrichen", () => editor.chain().focus().toggleStrike().run(), editor.isActive("strike"), <span className="line-through">Durch</span>)}
+
       {sep()}
+
       {btn("Markieren", () => editor.chain().focus().toggleHighlight({ color: "#E8FF6B" }).run(), editor.isActive("highlight"),
         <span className="bg-[#E8FF6B] text-[#0F0F0F] px-1 rounded font-bold">Mark</span>)}
       {btn("Code", () => editor.chain().focus().toggleCode().run(), editor.isActive("code"),
         <span className="font-mono text-[10px] bg-[#1E1E1E] px-1 rounded">Code</span>)}
+
       {sep()}
+
       {btn("Links", () => editor.chain().focus().setTextAlign("left").run(), editor.isActive({ textAlign: "left" }))}
       {btn("Mitte", () => editor.chain().focus().setTextAlign("center").run(), editor.isActive({ textAlign: "center" }))}
       {btn("Rechts", () => editor.chain().focus().setTextAlign("right").run(), editor.isActive({ textAlign: "right" }))}
@@ -83,9 +217,9 @@ interface SlashItem {
 }
 
 const SLASH_ITEMS: SlashItem[] = [
-  { label: "Überschrift 1", description: "Große Überschrift", icon: "H1",
+  { label: "Überschrift 1", description: "Großer Titel für den Abschnitt", icon: "H1",
     action: (e, f) => e.chain().focus().deleteRange({ from: f - 1, to: f }).toggleHeading({ level: 1 }).run() },
-  { label: "Überschrift 2", description: "Mittlere Überschrift", icon: "H2",
+  { label: "Überschrift 2", description: "Mittlere Zwischenüberschrift", icon: "H2",
     action: (e, f) => e.chain().focus().deleteRange({ from: f - 1, to: f }).toggleHeading({ level: 2 }).run() },
   { label: "Überschrift 3", description: "Kleine Überschrift", icon: "H3",
     action: (e, f) => e.chain().focus().deleteRange({ from: f - 1, to: f }).toggleHeading({ level: 3 }).run() },
@@ -111,7 +245,7 @@ function SlashMenu({ items, selectedIdx, position, onSelect }: {
   if (!position || items.length === 0) return null;
   return (
     <div
-      className="fixed z-50 bg-[#161616] border border-[#2A2A2A] rounded-xl shadow-2xl p-1.5 min-w-[220px] max-h-72 overflow-y-auto"
+      className="fixed z-50 bg-[#161616] border border-[#2A2A2A] rounded-xl shadow-2xl p-1.5 min-w-[240px] max-h-72 overflow-y-auto"
       style={{ top: position.top, left: position.left }}
     >
       <div className="text-[9px] text-[#444444] uppercase tracking-wider px-3 pb-1 pt-0.5">Block einfügen</div>
@@ -157,14 +291,13 @@ function ContextMenu({ editor, menu, onClose, onInsertImage }: {
       </button>
     );
   }
-
-  function sep() { return <div className="my-1 border-t border-[#222222]" />; }
+  function sep() { return <div key={Math.random()} className="my-1 border-t border-[#222222]" />; }
 
   const inTable = editor.isActive("table");
 
   return (
     <div
-      className="fixed z-50 bg-[#161616] border border-[#2A2A2A] rounded-xl shadow-2xl p-1.5 min-w-[190px]"
+      className="fixed z-50 bg-[#161616] border border-[#2A2A2A] rounded-xl shadow-2xl p-1.5 min-w-[200px]"
       style={{ top: menu.y, left: menu.x }}
       onMouseDown={(e) => e.stopPropagation()}
     >
@@ -215,12 +348,14 @@ export function RichEditor({ content, onChange, placeholder }: RichEditorProps) 
       StarterKit.configure({ heading: { levels: [1, 2, 3] } }),
       Underline,
       TextStyle,
+      FontFamily,
+      FontSize,
       Color,
       Highlight.configure({ multicolor: true }),
       TextAlign.configure({ types: ["heading", "paragraph"] }),
       Image.configure({ inline: false, allowBase64: true }),
       Placeholder.configure({
-        placeholder: placeholder ?? "Schreib hier… oder tippe / für Befehle",
+        placeholder: placeholder ?? "Schreib hier… oder tippe / für Blöcke",
         emptyEditorClass: "is-editor-empty",
       }),
       Table.configure({ resizable: true }),
@@ -237,7 +372,7 @@ export function RichEditor({ content, onChange, placeholder }: RichEditorProps) 
     onUpdate({ editor }) {
       onChange(editor.getHTML());
 
-      // Slash menu detection
+      // Slash menu
       const { from } = editor.state.selection;
       const textBefore = editor.state.doc.textBetween(Math.max(0, from - 30), from);
       const slashMatch = textBefore.match(/\/(\w*)$/);
@@ -254,16 +389,11 @@ export function RichEditor({ content, onChange, placeholder }: RichEditorProps) 
     },
     onSelectionUpdate({ editor }) {
       const { from, to } = editor.state.selection;
-      if (from === to) {
-        // No selection — hide bubble
-        setBubble((b) => ({ ...b, visible: false }));
-        return;
-      }
-      // Show bubble above selection
-      const start = editor.view.coordsAtPos(from);
-      const end = editor.view.coordsAtPos(to);
-      const midX = (start.left + end.left) / 2;
-      setBubble({ top: start.top - 60, left: midX, visible: true });
+      if (from === to) { setBubble((b) => ({ ...b, visible: false })); return; }
+      const startCoords = editor.view.coordsAtPos(from);
+      const endCoords = editor.view.coordsAtPos(to);
+      const midX = (startCoords.left + endCoords.left) / 2;
+      setBubble({ top: startCoords.top - 60, left: midX, visible: true });
     },
   });
 
@@ -275,7 +405,6 @@ export function RichEditor({ content, onChange, placeholder }: RichEditorProps) 
     }
   }, [editor, content]);
 
-  // Slash menu keyboard nav
   const filteredSlash = SLASH_ITEMS.filter((i) =>
     i.label.toLowerCase().includes(slashSearch) || i.description.toLowerCase().includes(slashSearch)
   );
@@ -297,17 +426,12 @@ export function RichEditor({ content, onChange, placeholder }: RichEditorProps) 
     return () => window.removeEventListener("keydown", onKey, true);
   });
 
-  // Close menus on outside click
   useEffect(() => {
-    function close(e: MouseEvent) {
-      setContextMenu((m) => ({ ...m, visible: false }));
-      if (slashOpen) setSlashOpen(false);
-    }
+    function close() { setContextMenu((m) => ({ ...m, visible: false })); setSlashOpen(false); }
     window.addEventListener("mousedown", close);
     return () => window.removeEventListener("mousedown", close);
-  }, [slashOpen]);
+  }, []);
 
-  // Hide bubble when clicking outside
   useEffect(() => {
     function hide() { setBubble((b) => ({ ...b, visible: false })); }
     document.addEventListener("mousedown", hide);
@@ -327,8 +451,8 @@ export function RichEditor({ content, onChange, placeholder }: RichEditorProps) 
 
   function handleContextMenu(e: React.MouseEvent) {
     e.preventDefault();
-    const x = Math.min(e.clientX, window.innerWidth - 210);
-    const y = Math.min(e.clientY, window.innerHeight - 340);
+    const x = Math.min(e.clientX, window.innerWidth - 220);
+    const y = Math.min(e.clientY, window.innerHeight - 360);
     setContextMenu({ x, y, visible: true });
   }
 
@@ -336,39 +460,29 @@ export function RichEditor({ content, onChange, placeholder }: RichEditorProps) 
 
   return (
     <div className="flex flex-col">
-      {/* Floating bubble toolbar */}
       <FloatingToolbar editor={editor} bubble={bubble} />
-
-      {/* Slash command menu */}
       <SlashMenu
         items={filteredSlash}
         selectedIdx={slashIdx}
         position={slashOpen ? slashPos : null}
         onSelect={(item) => { item.action(editor, slashFrom); setSlashOpen(false); }}
       />
-
-      {/* Right-click context menu */}
       <ContextMenu
         editor={editor}
         menu={contextMenu}
         onClose={() => setContextMenu((m) => ({ ...m, visible: false }))}
         onInsertImage={insertImage}
       />
-
-      {/* Hidden image file input */}
       <input ref={fileInputRef} type="file" accept="image/*" className="hidden" onChange={handleImageFile} />
 
-      {/* Keyboard shortcuts hint */}
+      {/* Hints */}
       <div className="flex flex-wrap items-center gap-x-4 gap-y-1 mb-5 text-[10px] text-[#3A3A3A]">
-        <span><kbd className="bg-[#1A1A1A] border border-[#2A2A2A] rounded px-1 font-mono text-[9px]">/</kbd> Befehle</span>
+        <span><kbd className="bg-[#1A1A1A] border border-[#2A2A2A] rounded px-1 font-mono text-[9px]">/</kbd> Blöcke</span>
+        <span>Text markieren → Schriftart & Größe</span>
         <span>Rechtsklick → Menü</span>
-        <span>Text markieren → Toolbar</span>
-        <span><kbd className="bg-[#1A1A1A] border border-[#2A2A2A] rounded px-1 font-mono text-[9px]">Strg+B</kbd> Fett</span>
-        <span><kbd className="bg-[#1A1A1A] border border-[#2A2A2A] rounded px-1 font-mono text-[9px]">Strg+I</kbd> Kursiv</span>
-        <span><kbd className="bg-[#1A1A1A] border border-[#2A2A2A] rounded px-1 font-mono text-[9px]">Strg+Z</kbd> Rückgängig</span>
+        <span><kbd className="bg-[#1A1A1A] border border-[#2A2A2A] rounded px-1 font-mono text-[9px]">Strg+B/I/Z</kbd></span>
       </div>
 
-      {/* Editor */}
       <div onContextMenu={handleContextMenu} onMouseDown={(e) => e.stopPropagation()}>
         <EditorContent editor={editor} />
       </div>
