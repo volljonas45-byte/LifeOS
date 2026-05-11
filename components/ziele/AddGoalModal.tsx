@@ -9,19 +9,29 @@ interface AddGoalModalProps {
   onAdd: (title: string, year: number) => Promise<void>;
 }
 
+const CURRENT_YEAR = 2026;
+
 export function AddGoalModal({ open, onClose, onAdd }: AddGoalModalProps) {
   const [title, setTitle] = useState("");
-  const [year, setYear] = useState(new Date().getFullYear());
+  const [year, setYear] = useState(CURRENT_YEAR);
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     if (!title.trim()) return;
     setLoading(true);
-    await onAdd(title.trim(), year);
-    setTitle("");
-    setLoading(false);
-    onClose();
+    setError("");
+    try {
+      await onAdd(title.trim(), year);
+      setTitle("");
+      onClose();
+    } catch (err: any) {
+      setError("Fehler beim Speichern. Bitte nochmal versuchen.");
+      console.error(err);
+    } finally {
+      setLoading(false);
+    }
   }
 
   return (
@@ -53,6 +63,7 @@ export function AddGoalModal({ open, onClose, onAdd }: AddGoalModalProps) {
               className="w-full px-3 py-2 bg-[#0F0F0F] border border-[#2A2A2A] rounded-lg text-sm text-[#EDEDED] focus:outline-none focus:ring-1 focus:ring-[#E8FF6B]/40 focus:border-[#E8FF6B]/50"
             />
           </div>
+          {error && <p className="text-xs text-[#F87171]">{error}</p>}
           <div className="flex gap-2 pt-2">
             <button type="button" onClick={onClose} className="flex-1 py-2 rounded-lg border border-[#222222] text-sm text-[#666666] hover:bg-[#1A1A1A] transition-colors">
               Abbrechen

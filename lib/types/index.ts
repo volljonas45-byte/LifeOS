@@ -49,6 +49,8 @@ export interface Goal {
   milestones?: Milestone[];
 }
 
+export type MilestoneProgressType = "percent" | "value";
+
 export interface Milestone {
   id: string;
   user_id: string;
@@ -57,6 +59,10 @@ export interface Milestone {
   deadline: string | null;
   start_date: string | null;
   progress: number;
+  progress_type: MilestoneProgressType;
+  current_value: number | null;
+  target_value: number | null;
+  value_unit: string | null;
   status: GoalStatus;
   score_start: number | null;
   score_goal: number | null;

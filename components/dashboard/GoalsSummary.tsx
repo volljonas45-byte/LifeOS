@@ -10,7 +10,7 @@ export function GoalsSummary() {
   return (
     <div className="bg-[#161616] border border-[#262626] rounded-2xl p-6 h-full">
       <div className="flex items-center justify-between mb-5">
-        <h2 className="text-xs font-semibold text-[#777777] uppercase tracking-widest">Jahresziele {new Date().getFullYear()}</h2>
+        <h2 className="text-xs font-semibold text-[#777777] uppercase tracking-widest">Jahresziele 2026</h2>
         <Link href="/ziele" className="text-[10px] text-[#E8FF6B] hover:text-[#D4EB5A] transition-colors">Alle →</Link>
       </div>
 
