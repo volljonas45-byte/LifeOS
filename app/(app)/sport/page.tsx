@@ -36,7 +36,7 @@ export default function SportPage() {
         )}
 
         <div className="flex items-center justify-between mb-5">
-          <h2 className="text-[10px] font-semibold text-[#444444] uppercase tracking-[0.12em]">
+          <h2 className="text-xs font-semibold text-[#777777] uppercase tracking-widest">
             Workouts
           </h2>
           <button
@@ -52,9 +52,9 @@ export default function SportPage() {
             {[1, 2, 3].map((i) => <div key={i} className="h-20 bg-[#1A1A1A] rounded-xl animate-pulse" />)}
           </div>
         ) : workouts.length === 0 ? (
-          <div className="bg-[#111111] border border-[#1E1E1E] rounded-xl p-10 text-center">
+          <div className="bg-[#161616] border border-[#262626] rounded-xl p-10 text-center">
             <span className="text-4xl opacity-20 block mb-3">◈</span>
-            <p className="text-[#555555] text-sm mb-4">Noch kein Workout geloggt.</p>
+            <p className="text-[#777777] text-sm mb-4">Noch kein Workout geloggt.</p>
             <button onClick={() => setModalOpen(true)} className="px-4 py-2 bg-[#E8FF6B] text-[#0F0F0F] rounded-lg text-sm font-semibold hover:bg-[#D4EB5A] transition-colors">
               Erstes Workout loggen
             </button>
@@ -75,10 +75,10 @@ export default function SportPage() {
 
 function StatCard({ label, value, unit }: { label: string; value: number | string; unit?: string }) {
   return (
-    <div className="bg-[#111111] border border-[#1E1E1E] rounded-xl p-4">
-      <p className="text-[10px] text-[#444444] uppercase tracking-[0.1em] mb-1">{label}</p>
+    <div className="bg-[#161616] border border-[#262626] rounded-xl p-4">
+      <p className="text-[10px] text-[#777777] uppercase tracking-widest mb-1">{label}</p>
       <p className="text-2xl font-semibold text-[#EDEDED] leading-none">{value}</p>
-      {unit && <p className="text-[10px] text-[#555555] mt-1">{unit}</p>}
+      {unit && <p className="text-[10px] text-[#666666] mt-1">{unit}</p>}
     </div>
   );
 }
@@ -88,7 +88,7 @@ function WorkoutCard({ workout: w, onDelete }: { workout: any; onDelete: (id: st
   const exerciseCount = (w.exercises ?? []).length;
 
   return (
-    <div className="bg-[#111111] border border-[#1E1E1E] rounded-xl overflow-hidden">
+    <div className="bg-[#161616] border border-[#262626] rounded-xl overflow-hidden">
       <button
         onClick={() => setExpanded((v) => !v)}
         className="w-full flex items-center justify-between px-5 py-4 text-left hover:bg-[#161616] transition-colors"
@@ -116,7 +116,7 @@ function WorkoutCard({ workout: w, onDelete }: { workout: any; onDelete: (id: st
         <div className="border-t border-[#1A1A1A] px-5 py-3">
           <div className="space-y-1.5">
             {/* Header */}
-            <div className="grid grid-cols-[1fr_56px_56px_64px] gap-2 text-[9px] text-[#333333] uppercase tracking-wider pb-1">
+            <div className="grid grid-cols-[1fr_56px_56px_64px] gap-2 text-[9px] text-[#555555] uppercase tracking-wider pb-1">
               <span>Übung</span>
               <span className="text-center">Sätze</span>
               <span className="text-center">Wdh</span>

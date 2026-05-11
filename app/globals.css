@@ -39,16 +39,16 @@
   --radius-xl: calc(var(--radius) * 1.4);
 
   /* LifeOS Dark Design Tokens */
-  --color-base:        #0F0F0F;
-  --color-surface:     #171717;
-  --color-surface-2:   #1F1F1F;
-  --color-surface-3:   #272727;
-  --color-border:      #2A2A2A;
-  --color-border-2:    #333333;
+  --color-base:        #0D0D0D;
+  --color-surface:     #181818;
+  --color-surface-2:   #222222;
+  --color-surface-3:   #2A2A2A;
+  --color-border:      #2E2E2E;
+  --color-border-2:    #3A3A3A;
 
-  --color-text:        #EDEDED;
-  --color-text-muted:  #888888;
-  --color-text-faint:  #555555;
+  --color-text:        #F0F0F0;
+  --color-text-muted:  #999999;
+  --color-text-faint:  #666666;
 
   --color-accent:      #E8FF6B;
   --color-accent-dim:  #D4EB5A;

@@ -48,22 +48,22 @@ export default function DokumentePage() {
         <div className="flex-1 px-8 py-6">
           {/* Header */}
           <div className="flex items-center gap-4 mb-6">
-            <h2 className="text-[10px] font-semibold text-[#444444] uppercase tracking-[0.12em] shrink-0">
+            <h2 className="text-xs font-semibold text-[#777777] uppercase tracking-widest shrink-0">
               {sectionTitle}
-              {search && <span className="text-[#333333] normal-case ml-1">· "{search}"</span>}
+              {search && <span className="text-[#555555] normal-case ml-1">· "{search}"</span>}
             </h2>
 
             {/* Search */}
             <div className="flex-1 relative max-w-xs">
-              <span className="absolute left-3 top-1/2 -translate-y-1/2 text-[#333333] text-xs">⌕</span>
+              <span className="absolute left-3 top-1/2 -translate-y-1/2 text-[#555555] text-xs">⌕</span>
               <input
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
                 placeholder="Suchen…"
-                className="w-full pl-7 pr-3 py-1.5 bg-[#111111] border border-[#1E1E1E] rounded-lg text-xs text-[#CCCCCC] placeholder:text-[#333333] focus:outline-none focus:border-[#2A2A2A]"
+                className="w-full pl-7 pr-3 py-1.5 bg-[#161616] border border-[#262626] rounded-lg text-xs text-[#DDDDDD] placeholder:text-[#555555] focus:outline-none focus:border-[#333333]"
               />
               {search && (
-                <button onClick={() => setSearch("")} className="absolute right-3 top-1/2 -translate-y-1/2 text-[#444444] hover:text-[#888888]">×</button>
+                <button onClick={() => setSearch("")} className="absolute right-3 top-1/2 -translate-y-1/2 text-[#666666] hover:text-[#AAAAAA]">×</button>
               )}
             </div>
 
@@ -80,8 +80,8 @@ export default function DokumentePage() {
               {[1,2,3,4,5,6].map((i) => <div key={i} className="h-28 bg-[#1A1A1A] rounded-xl animate-pulse" />)}
             </div>
           ) : filtered.length === 0 ? (
-            <div className="bg-[#111111] border border-[#1E1E1E] rounded-xl p-10 text-center">
-              <p className="text-[#555555] text-sm mb-4">
+            <div className="bg-[#161616] border border-[#262626] rounded-xl p-10 text-center">
+              <p className="text-[#777777] text-sm mb-4">
                 {search ? `Keine Treffer für "${search}".` : "Noch nichts hier."}
               </p>
               {!search && (

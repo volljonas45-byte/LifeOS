@@ -45,10 +45,10 @@ export function FocusWidget() {
   const weekNumber = weekKey.split("-W")[1];
 
   return (
-    <div className="bg-[#111111] border border-[#1E1E1E] rounded-2xl p-6">
+    <div className="bg-[#161616] border border-[#262626] rounded-2xl p-6">
       <div className="flex items-center justify-between mb-5">
-        <h2 className="text-[10px] font-semibold text-[#444444] uppercase tracking-[0.12em]">Fokus diese Woche</h2>
-        <span className="text-[10px] text-[#2A2A2A]">KW {weekNumber}</span>
+        <h2 className="text-xs font-semibold text-[#777777] uppercase tracking-widest">Fokus diese Woche</h2>
+        <span className="text-[10px] text-[#444444]">KW {weekNumber}</span>
       </div>
       <div className="space-y-2">
         {items.map((item, i) => (
@@ -74,8 +74,8 @@ export function FocusWidget() {
                 className="flex-1 text-left text-sm transition-colors"
               >
                 {item.trim()
-                  ? <span className="text-[#CCCCCC]">{item}</span>
-                  : <span className="text-[#2A2A2A] italic">Priorität {i + 1} eintragen…</span>
+                  ? <span className="text-[#DDDDDD]">{item}</span>
+                  : <span className="text-[#444444] italic">Priorität {i + 1} eintragen…</span>
                 }
               </button>
             )}

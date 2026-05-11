@@ -30,22 +30,22 @@ export function HabitStats() {
   const DAY_SHORT = ["Mo", "Di", "Mi", "Do", "Fr", "Sa", "So"];
 
   return (
-    <div className="bg-[#111111] border border-[#1E1E1E] rounded-xl p-5 mb-4">
+    <div className="bg-[#161616] border border-[#262626] rounded-xl p-5 mb-4">
       <div className="grid grid-cols-3 gap-4 mb-5">
         <div>
-          <p className="text-[10px] text-[#444444] uppercase tracking-[0.1em] mb-1">Heute</p>
+          <p className="text-[10px] text-[#777777] uppercase tracking-widest mb-1">Heute</p>
           <p className="text-2xl font-semibold text-[#EDEDED] leading-none tabular-nums">
-            {todayDone}<span className="text-sm text-[#444444] font-normal">/{todayTotal}</span>
+            {todayDone}<span className="text-sm text-[#555555] font-normal">/{todayTotal}</span>
           </p>
         </div>
         <div>
-          <p className="text-[10px] text-[#444444] uppercase tracking-[0.1em] mb-1">Ø diese Woche</p>
+          <p className="text-[10px] text-[#777777] uppercase tracking-widest mb-1">Ø diese Woche</p>
           <p className="text-2xl font-semibold text-[#EDEDED] leading-none tabular-nums">
-            {weekAvg}<span className="text-sm text-[#444444] font-normal">%</span>
+            {weekAvg}<span className="text-sm text-[#555555] font-normal">%</span>
           </p>
         </div>
         <div>
-          <p className="text-[10px] text-[#444444] uppercase tracking-[0.1em] mb-1">Habits total</p>
+          <p className="text-[10px] text-[#777777] uppercase tracking-widest mb-1">Habits total</p>
           <p className="text-2xl font-semibold text-[#EDEDED] leading-none tabular-nums">{habits.length}</p>
         </div>
       </div>
@@ -63,7 +63,7 @@ export function HabitStats() {
                   style={{ height: `${score}%`, marginTop: `${100 - score}%` }}
                 />
               </div>
-              <span className={`text-[9px] ${isToday ? "text-[#E8FF6B]" : "text-[#333333]"}`}>
+              <span className={`text-[9px] ${isToday ? "text-[#E8FF6B]" : "text-[#555555]"}`}>
                 {DAY_SHORT[i]}
               </span>
             </div>

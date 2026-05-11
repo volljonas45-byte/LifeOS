@@ -19,12 +19,12 @@ export default function ZielePage() {
         {/* Jahresziele Grid */}
         <div>
           <div className="flex items-center justify-between mb-5">
-            <h2 className="text-[10px] font-semibold text-[#444444] uppercase tracking-[0.12em]">
+            <h2 className="text-xs font-semibold text-[#777777] uppercase tracking-widest">
               Jahresziele
             </h2>
             <button
               onClick={() => setModalOpen(true)}
-              className="text-xs text-[#555555] hover:text-[#E8FF6B] transition-colors flex items-center gap-1"
+              className="text-xs text-[#777777] hover:text-[#E8FF6B] transition-colors flex items-center gap-1"
             >
               + Ziel hinzufügen
             </button>
@@ -52,7 +52,7 @@ export default function ZielePage() {
                   <button
                     key={i}
                     onClick={() => setModalOpen(true)}
-                    className="h-44 border border-dashed border-[#222222] rounded-xl text-[#333333] hover:border-[#333333] hover:text-[#555555] transition-colors text-sm"
+                    className="h-44 border border-dashed border-[#2A2A2A] rounded-xl text-[#555555] hover:border-[#3A3A3A] hover:text-[#777777] transition-colors text-sm"
                   >
                     + Ziel {goals.length + i + 1}
                   </button>
@@ -64,7 +64,7 @@ export default function ZielePage() {
                 <button
                   key={i}
                   onClick={() => setModalOpen(true)}
-                  className="h-44 border border-dashed border-[#222222] rounded-xl text-[#333333] hover:border-[#333333] hover:text-[#555555] transition-colors text-sm"
+                  className="h-44 border border-dashed border-[#2A2A2A] rounded-xl text-[#555555] hover:border-[#3A3A3A] hover:text-[#777777] transition-colors text-sm"
                 >
                   + Ziel {i}
                 </button>

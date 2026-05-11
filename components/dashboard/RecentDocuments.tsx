@@ -14,9 +14,9 @@ export function RecentDocuments() {
   const { documents, loading } = useDocuments({});
 
   return (
-    <div className="bg-[#111111] border border-[#1E1E1E] rounded-2xl p-6 h-full">
+    <div className="bg-[#161616] border border-[#262626] rounded-2xl p-6 h-full">
       <div className="flex items-center justify-between mb-5">
-        <h2 className="text-[10px] font-semibold text-[#444444] uppercase tracking-[0.12em]">Zuletzt bearbeitet</h2>
+        <h2 className="text-xs font-semibold text-[#777777] uppercase tracking-widest">Zuletzt bearbeitet</h2>
         <Link href="/dokumente" className="text-[10px] text-[#E8FF6B] hover:text-[#D4EB5A] transition-colors">Alle →</Link>
       </div>
 
@@ -41,7 +41,7 @@ export function RecentDocuments() {
               <span className="text-sm text-[#AAAAAA] group-hover:text-[#EDEDED] transition-colors truncate flex-1">
                 {doc.title}
               </span>
-              <span className="text-[10px] text-[#333333] shrink-0">
+              <span className="text-[10px] text-[#555555] shrink-0">
                 {formatDate(doc.updated_at, "d. MMM")}
               </span>
             </Link>

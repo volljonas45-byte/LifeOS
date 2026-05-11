@@ -16,7 +16,7 @@ export function Sidebar() {
   const pathname = usePathname();
 
   return (
-    <aside className="w-48 shrink-0 border-r border-[#1E1E1E] bg-[#0A0A0A] flex flex-col min-h-screen">
+    <aside className="w-52 shrink-0 border-r border-[#232323] bg-[#0D0D0D] flex flex-col min-h-screen">
       {/* Logo */}
       <div className="px-5 pt-7 pb-6">
         <div className="flex items-center gap-2">
@@ -34,10 +34,10 @@ export function Sidebar() {
               key={item.href}
               href={item.href}
               className={cn(
-                "flex items-center gap-3 px-3 py-2 rounded-lg text-sm transition-all duration-150",
+                "flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm transition-all duration-150",
                 active
-                  ? "bg-[#1A1A1A] text-[#EDEDED] font-medium"
-                  : "text-[#555555] hover:text-[#AAAAAA] hover:bg-[#141414]"
+                  ? "bg-[#1F1F1F] text-[#F0F0F0] font-medium"
+                  : "text-[#666666] hover:text-[#BBBBBB] hover:bg-[#161616]"
               )}
             >
               <span className={cn(
@@ -54,7 +54,7 @@ export function Sidebar() {
       </nav>
 
       {/* Footer */}
-      <div className="px-3 pb-5 pt-3 border-t border-[#1A1A1A]">
+      <div className="px-3 pb-5 pt-3 border-t border-[#232323]">
         <LogoutButton />
       </div>
     </aside>

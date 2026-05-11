@@ -51,7 +51,7 @@ export function DashboardHero() {
       <div className="flex items-center justify-between">
         {/* Left: greeting */}
         <div>
-          <p className="text-[11px] font-medium text-[#333333] uppercase tracking-[0.15em] mb-2">{dateStr}</p>
+          <p className="text-[11px] font-medium text-[#666666] uppercase tracking-[0.15em] mb-2">{dateStr}</p>
           <h1 className="font-display text-4xl font-semibold text-[#EDEDED] tracking-tight leading-none">
             {greeting}
           </h1>
@@ -76,7 +76,7 @@ export function DashboardHero() {
             <p className="text-3xl font-semibold text-[#EDEDED] tabular-nums tracking-tight leading-none font-display">
               {timeStr}
             </p>
-            <p className="text-[10px] text-[#333333] mt-1 uppercase tracking-widest">
+            <p className="text-[10px] text-[#555555] mt-1 uppercase tracking-widest">
               {hour < 12 ? "Vormittag" : hour < 17 ? "Nachmittag" : "Abend"}
             </p>
           </div>
@@ -103,7 +103,7 @@ function QuickPill({ href, label, icon, accent }: { href: string; label: string;
       className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs font-medium border transition-all ${
         accent
           ? "bg-[#E8FF6B] text-[#0F0F0F] border-[#E8FF6B] hover:bg-[#D4EB5A]"
-          : "bg-transparent text-[#555555] border-[#1E1E1E] hover:border-[#2A2A2A] hover:text-[#AAAAAA]"
+          : "bg-transparent text-[#777777] border-[#262626] hover:border-[#333333] hover:text-[#AAAAAA]"
       }`}>
       <span>{icon}</span>
       <span>{label}</span>

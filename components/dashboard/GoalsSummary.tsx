@@ -8,9 +8,9 @@ export function GoalsSummary() {
   const { goals, loading } = useGoals();
 
   return (
-    <div className="bg-[#111111] border border-[#1E1E1E] rounded-2xl p-6 h-full">
+    <div className="bg-[#161616] border border-[#262626] rounded-2xl p-6 h-full">
       <div className="flex items-center justify-between mb-5">
-        <h2 className="text-[10px] font-semibold text-[#444444] uppercase tracking-[0.12em]">Jahresziele {new Date().getFullYear()}</h2>
+        <h2 className="text-xs font-semibold text-[#777777] uppercase tracking-widest">Jahresziele {new Date().getFullYear()}</h2>
         <Link href="/ziele" className="text-[10px] text-[#E8FF6B] hover:text-[#D4EB5A] transition-colors">Alle →</Link>
       </div>
 
@@ -40,7 +40,7 @@ export function GoalsSummary() {
                 <div className="flex-1 min-w-0">
                   <p className="text-sm font-medium text-[#DDDDDD] truncate group-hover:text-[#EDEDED] transition-colors">{g.title}</p>
                   {milestones.length > 0 && (
-                    <p className="text-[11px] text-[#444444] mt-0.5">{done}/{milestones.length} Meilensteine</p>
+                    <p className="text-[11px] text-[#666666] mt-0.5">{done}/{milestones.length} Meilensteine</p>
                   )}
                 </div>
                 <StatusBadge status={g.status} />
