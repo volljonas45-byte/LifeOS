@@ -77,20 +77,20 @@ export default function DocumentDetailPage() {
           <Link href="/dokumente" className="text-[#555555] hover:text-[#AAAAAA] transition-colors text-sm">
             ← Dokumente
           </Link>
-          <span className="text-[#222222]">|</span>
-          <span className="text-[10px] px-2 py-0.5 bg-[#1A1A1A] text-[#555555] rounded border border-[#242424]">
+          <span className="text-[#333333]">|</span>
+          <span className="text-[10px] px-2 py-0.5 bg-[#1E1E1E] text-[#888888] rounded border border-[#2A2A2A]">
             {TYPE_LABELS[doc.type]}
           </span>
         </div>
         <div className="flex items-center gap-4">
-          {saving && <span className="text-[10px] text-[#444444]">Speichern…</span>}
-          <span className="text-[10px] text-[#333333]">
+          {saving && <span className="text-[10px] text-[#777777]">Speichern…</span>}
+          <span className="text-[10px] text-[#666666]">
             {formatDate(doc.updated_at, "d. MMM yyyy, HH:mm")}
           </span>
-          <button onClick={toggleFavorite} className={`text-sm transition-colors ${doc.is_favorite ? "text-[#E8FF6B]" : "text-[#333333] hover:text-[#666666]"}`}>
+          <button onClick={toggleFavorite} className={`text-sm transition-colors ${doc.is_favorite ? "text-[#E8FF6B]" : "text-[#555555] hover:text-[#888888]"}`}>
             {doc.is_favorite ? "⭐" : "☆"}
           </button>
-          <button onClick={handleDelete} className="text-[10px] text-[#444444] hover:text-[#F87171] transition-colors">
+          <button onClick={handleDelete} className="text-[10px] text-[#666666] hover:text-[#F87171] transition-colors">
             Löschen
           </button>
         </div>
@@ -102,14 +102,14 @@ export default function DocumentDetailPage() {
           value={title}
           onChange={(e) => setTitle(e.target.value)}
           onBlur={handleTitleBlur}
-          className="w-full font-display text-4xl font-semibold text-[#EDEDED] bg-transparent border-none outline-none placeholder:text-[#2A2A2A] mb-8 leading-tight"
+          className="w-full font-display text-4xl font-semibold text-[#EDEDED] bg-transparent border-none outline-none placeholder:text-[#444444] mb-8 leading-tight"
           placeholder="Titel..."
         />
         <textarea
           value={content}
           onChange={(e) => setContent(e.target.value)}
           placeholder="Schreib hier etwas..."
-          className="w-full min-h-[60vh] text-base text-[#CCCCCC] bg-transparent border-none outline-none resize-none placeholder:text-[#2A2A2A] leading-relaxed"
+          className="w-full min-h-[60vh] text-base text-[#DDDDDD] bg-transparent border-none outline-none resize-none placeholder:text-[#444444] leading-relaxed"
         />
       </div>
     </div>
