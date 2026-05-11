@@ -116,6 +116,10 @@
     @apply bg-background text-foreground;
     font-family: var(--font-inter), sans-serif;
   }
+  input, textarea {
+    color: inherit;
+    background-color: transparent;
+  }
   ::selection {
     background: #E8FF6B;
     color: #0F0F0F;

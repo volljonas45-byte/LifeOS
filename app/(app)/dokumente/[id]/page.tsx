@@ -102,14 +102,16 @@ export default function DocumentDetailPage() {
           value={title}
           onChange={(e) => setTitle(e.target.value)}
           onBlur={handleTitleBlur}
-          className="w-full font-display text-4xl font-semibold text-[#EDEDED] bg-transparent border-none outline-none placeholder:text-[#444444] mb-8 leading-tight"
           placeholder="Titel..."
+          className="w-full font-display text-4xl font-semibold border-none outline-none mb-8 leading-tight placeholder:text-[#444444]"
+          style={{ background: "transparent", color: "#EDEDED" }}
         />
         <textarea
           value={content}
           onChange={(e) => setContent(e.target.value)}
           placeholder="Schreib hier etwas..."
-          className="w-full min-h-[60vh] text-base text-[#DDDDDD] bg-transparent border-none outline-none resize-none placeholder:text-[#444444] leading-relaxed"
+          className="w-full min-h-[60vh] text-base border-none outline-none resize-none leading-relaxed placeholder:text-[#444444]"
+          style={{ background: "transparent", color: "#DDDDDD" }}
         />
       </div>
     </div>
