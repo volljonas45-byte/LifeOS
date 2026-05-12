@@ -44,65 +44,89 @@ export function FocusWidget() {
   }
 
   const filled = items.filter(i => i.trim()).length;
+  const allFilled = filled === 3;
 
   return (
-    <div className="bg-[#0E0E0E] border border-[#1A1A1A] rounded-2xl p-6">
-      <div className="flex items-center justify-between mb-5">
-        <div>
-          <h2 className="text-[10px] font-semibold text-[#333333] uppercase tracking-[0.18em]">Wochenfokus</h2>
+    <div className="bg-[#0C0C0C] border border-[#161616] rounded-2xl p-5 h-full flex flex-col">
+      <div className="flex items-center justify-between mb-4">
+        <div className="flex items-center gap-2.5">
+          <h2 className="text-[11px] font-semibold text-[#333333] uppercase tracking-[0.18em]">Wochenfokus</h2>
+          {allFilled && (
+            <span className="text-[10px] px-2 py-0.5 rounded-full bg-[#E8FF6B]/10 text-[#E8FF6B] border border-[#E8FF6B]/20 font-medium">
+              ✓ Gesetzt
+            </span>
+          )}
         </div>
-        <span className="text-[10px] text-[#2A2A2A] border border-[#1A1A1A] px-2 py-0.5 rounded-full">
+        <span className="text-[10px] text-[#222222] bg-[#111111] border border-[#181818] px-2 py-0.5 rounded-full">
           KW {weekNumber}
         </span>
       </div>
 
-      <div className="space-y-2">
+      <div className="space-y-2 flex-1">
         {items.map((item, i) => {
           const hasFilled = !!item.trim();
+          const isEditing = editing === i;
+
           return (
-            <div key={i} className="flex items-center gap-3 group">
-              <div className={`w-5 h-5 rounded-lg border flex items-center justify-center shrink-0 transition-all ${
-                hasFilled
-                  ? "border-[#E8FF6B]/30 bg-[#E8FF6B]/8"
-                  : "border-[#1E1E1E] bg-transparent"
-              }`}>
-                {hasFilled
-                  ? <span className="text-[8px] font-bold text-[#E8FF6B]">{i + 1}</span>
-                  : <span className="text-[10px] text-[#2A2A2A]">{i + 1}</span>
-                }
+            <div
+              key={i}
+              onClick={() => !isEditing && setEditing(i)}
+              className={`flex items-center gap-3 px-3 py-3 rounded-xl border transition-all cursor-pointer group ${
+                isEditing
+                  ? "border-[#E8FF6B]/20 bg-[#0F0F0F]"
+                  : hasFilled
+                  ? "border-[#161616] hover:border-[#1E1E1E] bg-[#0A0A0A] hover:bg-[#0E0E0E]"
+                  : "border-dashed border-[#141414] hover:border-[#1E1E1E] hover:bg-[#0C0C0C]"
+              }`}
+            >
+              {/* Number badge */}
+              <div
+                className={`w-5 h-5 rounded-lg flex items-center justify-center text-[9px] font-bold shrink-0 transition-all ${
+                  hasFilled
+                    ? "bg-[#E8FF6B]/10 text-[#E8FF6B] border border-[#E8FF6B]/20"
+                    : "bg-transparent text-[#252525] border border-[#1A1A1A]"
+                }`}
+              >
+                {i + 1}
               </div>
 
-              {editing === i ? (
+              {/* Input / display */}
+              {isEditing ? (
                 <input
                   autoFocus
                   value={item}
                   onChange={(e) => handleChange(i, e.target.value)}
                   onBlur={() => setEditing(null)}
                   onKeyDown={(e) => handleKeyDown(e, i)}
-                  placeholder={`Priorität ${i + 1}…`}
-                  className="flex-1 bg-transparent text-sm text-[#EDEDED] placeholder:text-[#222222] outline-none border-b border-[#E8FF6B]/25 pb-0.5"
+                  placeholder={`Priorität ${i + 1} diese Woche…`}
+                  className="flex-1 bg-transparent text-[13px] text-[#EDEDED] placeholder:text-[#222222] outline-none"
                 />
               ) : (
-                <button
-                  onClick={() => setEditing(i)}
-                  className="flex-1 text-left text-sm transition-colors"
-                >
-                  {hasFilled
-                    ? <span className="text-[#CCCCCC] group-hover:text-[#EDEDED] transition-colors">{item}</span>
-                    : <span className="text-[#252525] group-hover:text-[#333333] transition-colors italic">Klicken zum Eintragen…</span>
-                  }
-                </button>
+                <span className={`flex-1 text-[13px] transition-colors ${
+                  hasFilled
+                    ? "text-[#BBBBBB] group-hover:text-[#DDDDDD]"
+                    : "text-[#1E1E1E] group-hover:text-[#2E2E2E] italic"
+                }`}>
+                  {hasFilled ? item : `Priorität ${i + 1} eintragen…`}
+                </span>
+              )}
+
+              {hasFilled && !isEditing && (
+                <span className="text-[10px] text-[#222222] group-hover:text-[#E8FF6B] transition-colors">✎</span>
               )}
             </div>
           );
         })}
       </div>
 
-      {filled === 3 && (
-        <div className="mt-4 pt-3 border-t border-[#141414]">
-          <p className="text-[10px] text-[#333333]">Top-3 für diese Woche gesetzt ✓</p>
-        </div>
-      )}
+      {/* Bottom hint */}
+      <div className="mt-3 pt-3 border-t border-[#111111]">
+        <p className="text-[10px] text-[#222222]">
+          {allFilled
+            ? "Top-3 Prioritäten für diese Woche gesetzt."
+            : `${3 - filled} Priorität${3 - filled !== 1 ? "en" : ""} noch offen — klicken um einzutragen.`}
+        </p>
+      </div>
     </div>
   );
 }
