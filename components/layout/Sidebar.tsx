@@ -56,6 +56,18 @@ const navItems = [
       </svg>
     ),
   },
+  {
+    href: "/aufgaben",
+    label: "Aufgaben",
+    icon: (
+      <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+        <path d="M6 4H13M6 8H13M6 12H10" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round"/>
+        <circle cx="3" cy="4" r="1.1" fill="currentColor"/>
+        <circle cx="3" cy="8" r="1.1" fill="currentColor"/>
+        <circle cx="3" cy="12" r="1.1" fill="currentColor"/>
+      </svg>
+    ),
+  },
 ];
 
 export function Sidebar() {

@@ -103,6 +103,23 @@ export interface WorkoutExercise {
   sort_order: number;
 }
 
+export type TodoPriority = "low" | "medium" | "high";
+export type TodoStatus = "open" | "in_progress" | "done";
+
+export interface Todo {
+  id: string;
+  user_id: string;
+  title: string;
+  notes: string | null;
+  priority: TodoPriority;
+  status: TodoStatus;
+  due_date: string | null;
+  tags: string[];
+  sort_order: number;
+  created_at: string;
+  completed_at: string | null;
+}
+
 export interface Document {
   id: string;
   user_id: string;

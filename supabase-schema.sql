@@ -97,6 +97,23 @@ CREATE TABLE workout_exercises (
   sort_order  int NOT NULL DEFAULT 0
 );
 
+-- TODOS
+CREATE TABLE todos (
+  id           uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+  user_id      uuid REFERENCES auth.users(id) ON DELETE CASCADE,
+  title        text NOT NULL,
+  notes        text,
+  priority     text NOT NULL DEFAULT 'medium',
+  status       text NOT NULL DEFAULT 'open',
+  due_date     date,
+  tags         text[] DEFAULT '{}',
+  sort_order   int  NOT NULL DEFAULT 0,
+  completed_at timestamptz,
+  created_at   timestamptz DEFAULT now()
+);
+ALTER TABLE todos ENABLE ROW LEVEL SECURITY;
+CREATE POLICY "todos_own" ON todos FOR ALL USING (auth.uid() = user_id) WITH CHECK (auth.uid() = user_id);
+
 -- DOCUMENTS
 CREATE TABLE documents (
   id           uuid PRIMARY KEY DEFAULT gen_random_uuid(),
