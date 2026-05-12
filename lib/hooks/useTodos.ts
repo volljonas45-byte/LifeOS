@@ -52,7 +52,7 @@ export function useTodos() {
   async function updateTodo(id: string, changes: Partial<Pick<Todo, "title" | "notes" | "priority" | "status" | "due_date" | "tags">>) {
     const extra: Record<string, string | null> = {};
     if (changes.status === "done") extra.completed_at = new Date().toISOString();
-    else if (changes.status && changes.status !== "done") extra.completed_at = null;
+    else if (changes.status) extra.completed_at = null;
 
     const { data, error } = await supabase
       .from("todos")
